@@ -30,18 +30,19 @@ var Unisquirt;
             "Map": {},
             "Quadrant": {},
             "Thing": {
-                "onMake": Unisquirt.Unisquirt.prototype.thingProcess,
                 "width": 8,
                 "height": 8,
+                "alive": true,
+                "scale": 1,
                 "opacity": 1,
-                "scale": 1
+                "onMake": Unisquirt.Unisquirt.prototype.thingProcess
             },
             "Character": {
                 "groupType": "Character"
             },
             "Player": {
-                "width": 32,
-                "height": 24
+                "width": 39,
+                "height": 31
             },
             "Particle": {
                 "groupType": "Particle"
@@ -50,15 +51,18 @@ var Unisquirt;
                 "groupType": "Scenery"
             },
             "Star": {
-                "spriteCycleSynched": [
-                    ["one", "two", "three", "two"],
-                    "shimmer",
-                    70
-                ]
+                "width": 8,
+                "height": 8,
+                "scale": .5,
+                "opacity": .7,
+                "onThingAdded": Unisquirt.Unisquirt.prototype.spawnStar,
+                "movement": Unisquirt.Unisquirt.prototype.moveStar
             },
             "Solid": {
-                "groupType": "Solid",
-                "repeat": true
+                "width": 56,
+                "height": 31,
+                "repeat": true,
+                "groupType": "Solid"
             },
             "Floor": {
                 "height": 16

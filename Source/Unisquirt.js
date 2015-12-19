@@ -49,12 +49,12 @@ var Unisquirt;
                     "Quadrant": {
                         "EightBitter": Unisquirter,
                         "GameStarter": Unisquirter,
-                        "Unisquirt": Unisquirter
+                        "Unisquirter": Unisquirter
                     },
                     "Thing": {
                         "EightBitter": Unisquirter,
                         "GameStarter": Unisquirter,
-                        "Unisquirt": Unisquirter
+                        "Unisquirter": Unisquirter
                     }
                 }
             }, Unisquirter.settings.objects));
@@ -82,7 +82,7 @@ var Unisquirt;
          * Completely restarts the game.
          */
         Unisquirt.prototype.gameStart = function () {
-            this.PixelDrawer.setBackground("Black");
+            this.PixelDrawer.setBackground(this.createNightGradient());
             this.setMap();
         };
         /**
@@ -105,6 +105,81 @@ var Unisquirt;
         Unisquirt.prototype.addPreThing = function (prething) {
             var thing = prething.thing;
             thing.GameStarter.addThing(thing, prething.left * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.left, prething.top * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.top);
+        };
+        /* Upkeep maintenence
+        */
+        /**
+         * Maintenance Function for any number of Thing groups. Each Thing with a
+         * movement Function has it called. Velocities are applied accounting for
+         * the approximate game frames per second.
+         *
+         * @param fps   The current estimated frames per second.
+         * @param thingGroups   Any number of Thing groups.
+         */
+        Unisquirt.prototype.maintainMoving = function (fps) {
+            var thingGroups = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                thingGroups[_i - 1] = arguments[_i];
+            }
+            var fpsRatio = isNaN(fps) ? 1 : 60 / fps, things, thing, i, j;
+            for (i = 0; i < thingGroups.length; i += 1) {
+                things = thingGroups[i];
+                if (!things.length) {
+                    continue;
+                }
+                for (j = 0; j < things.length; j += 1) {
+                    thing = things[j];
+                    if (thing.movement) {
+                        thing.movement(thing);
+                    }
+                    thing.Unisquirter.shiftHoriz(thing, (thing.xvel || 0) * fpsRatio);
+                    thing.Unisquirter.shiftVert(thing, (thing.yvel || 0) * fpsRatio);
+                }
+            }
+        };
+        /* Spawning
+        */
+        /**
+         * Spawn Function for a Star. It's given a random y-velocity updward and
+         * animated to flicker at a random speed.
+         *
+         * @param thing   The Star being spawned.
+         */
+        Unisquirt.prototype.spawnStar = function (thing) {
+            thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.117, -.007);
+            thing.Unisquirter.TimeHandler.addClassCycle(thing, ["one", "two", "three"], "shimmer", thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
+        };
+        /* Movement
+        */
+        /**
+         * Movement Function for a Star. If it's above the screen, it's shifted to below.
+         *
+         * @param thing   The Star in play.
+         */
+        Unisquirt.prototype.moveStar = function (thing) {
+            if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
+                thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
+            }
+        };
+        /* Map sets
+        */
+        /**
+         * Sets the game state to the "Night" map and "Sky" location, resetting all
+         * Things, inputs, and other previous game state in the process.
+         */
+        Unisquirt.prototype.setMap = function () {
+            this.AudioPlayer.clearAll();
+            this.GroupHolder.clearArrays();
+            this.InputWriter.restartHistory();
+            this.MapScreener.clearScreen();
+            this.TimeHandler.cancelAllEvents();
+            this.MapsHandler.setMap("Night", "Sky");
+            this.MapScreener.setVariables();
+            this.QuadsKeeper.resetQuadrants();
+            this.GamesRunner.play();
+            this.addPlayer();
+            this.addFloor();
+            this.addStars();
         };
         /**
          * Adds a new Player Thing to the game, centered horizontally and 16 in-game pixels
@@ -135,25 +210,21 @@ var Unisquirt;
                 this.addThing("Star", left, top);
             }
         };
-        /* Map sets
+        /* Graphics utilities
         */
         /**
-         * Sets the game state to the "Night" map and "Sky" location, resetting all
-         * Things, inputs, and other previous game state in the process.
+         * Generates a black-blue-indigo gradient from the top-center of the screen
+         * to the bottom-right for use as a PixelDrawr background.
+         *
+         * @returns The resultant CanvasGradient.
          */
-        Unisquirt.prototype.setMap = function () {
-            this.AudioPlayer.clearAll();
-            this.GroupHolder.clearArrays();
-            this.InputWriter.restartHistory();
-            this.MapScreener.clearScreen();
-            this.TimeHandler.cancelAllEvents();
-            this.MapsHandler.setMap("Night", "Sky");
-            this.MapScreener.setVariables();
-            this.QuadsKeeper.resetQuadrants();
-            this.GamesRunner.play();
-            this.addPlayer();
-            this.addFloor();
-            this.addStars();
+        Unisquirt.prototype.createNightGradient = function () {
+            var context = this.canvas.getContext("2d"), background = context.createLinearGradient(this.MapScreener.width / 2, 0, this.MapScreener.width, this.MapScreener.height);
+            background.addColorStop(0.14, "#000000");
+            background.addColorStop(0.56, "#000014");
+            background.addColorStop(0.84, "#140021");
+            background.addColorStop(1, "#210021");
+            return background;
         };
         // For the sake of reset functions, constants are stored as members of the 
         // Unisquirt class itself - this allows prototype setters to use 

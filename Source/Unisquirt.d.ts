@@ -6,7 +6,7 @@ declare module Unisquirt {
      * A Thing with traits specific to a Unisquirt.
      */
     export interface IThing extends GameStartr.IThing {
-        Unisquirt: IUnisquirt;
+        Unisquirter: IUnisquirt;
     }
 
     /**

@@ -4,6 +4,7 @@ var Unisquirt;
     "use strict";
     Unisquirt.Unisquirt.settings.events = {
         "keyOnClassCycleStart": "onThingAdd",
-        "timingDefault": 7
+        "keyDoClassCycleStart": "placed",
+        "keyCycleCheckValidity": "alive"
     };
 })(Unisquirt || (Unisquirt = {}));

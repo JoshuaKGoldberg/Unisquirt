@@ -112,12 +112,12 @@ module Unisquirt {
                             "Quadrant": {
                                 "EightBitter": Unisquirter,
                                 "GameStarter": Unisquirter,
-                                "Unisquirt": Unisquirter
+                                "Unisquirter": Unisquirter
                             },
                             "Thing": {
                                 "EightBitter": Unisquirter,
                                 "GameStarter": Unisquirter,
-                                "Unisquirt": Unisquirter
+                                "Unisquirter": Unisquirter
                             }
                         }
                     },
@@ -151,7 +151,7 @@ module Unisquirt {
          * Completely restarts the game.
          */
         gameStart(): void {
-            this.PixelDrawer.setBackground("Black");
+            this.PixelDrawer.setBackground(this.createNightGradient());
             this.setMap();
         }
 
@@ -181,6 +181,104 @@ module Unisquirt {
                 thing,
                 prething.left * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.left,
                 prething.top * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.top);
+        }
+
+
+        /* Upkeep maintenence
+        */
+
+        /**
+         * Maintenance Function for any number of Thing groups. Each Thing with a
+         * movement Function has it called. Velocities are applied accounting for
+         * the approximate game frames per second.
+         * 
+         * @param fps   The current estimated frames per second.
+         * @param thingGroups   Any number of Thing groups.
+         */
+        maintainMoving(fps: number, ...thingGroups: IThing[][]): void {
+            var fpsRatio: number = isNaN(fps) ? 1 : 60 / fps,
+                things: IThing[],
+                thing: IThing,
+                i: number,
+                j: number;
+
+            for (i = 0; i < thingGroups.length; i += 1) {
+                things = thingGroups[i];
+                if (!things.length) {
+                    continue;
+                }
+
+                for (j = 0; j < things.length; j += 1) {
+                    thing = things[j];
+                    if (thing.movement) {
+                        thing.movement(thing);
+                    }
+
+                    thing.Unisquirter.shiftHoriz(thing, (thing.xvel || 0) * fpsRatio);
+                    thing.Unisquirter.shiftVert(thing, (thing.yvel || 0) * fpsRatio);
+                }
+            }
+        }
+
+
+        /* Spawning
+        */
+
+        /**
+         * Spawn Function for a Star. It's given a random y-velocity updward and 
+         * animated to flicker at a random speed.
+         * 
+         * @param thing   The Star being spawned.
+         */
+        spawnStar(thing: IThing): void {
+            thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.117, -.007);
+            thing.Unisquirter.TimeHandler.addClassCycle(
+                thing,
+                ["one", "two", "three"],
+                "shimmer",
+                thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
+        }
+
+
+        /* Movement
+        */
+
+        /**
+         * Movement Function for a Star. If it's above the screen, it's shifted to below.
+         * 
+         * @param thing   The Star in play.
+         */
+        moveStar(thing: IThing): void {
+            if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
+                thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
+            }
+        }
+
+
+        /* Map sets
+        */
+
+        /**
+         * Sets the game state to the "Night" map and "Sky" location, resetting all 
+         * Things, inputs, and other previous game state in the process.
+         */
+        setMap(): void {
+            this.AudioPlayer.clearAll();
+            this.GroupHolder.clearArrays();
+            this.InputWriter.restartHistory();
+            this.MapScreener.clearScreen();
+            this.TimeHandler.cancelAllEvents();
+
+            this.MapsHandler.setMap("Night", "Sky");
+
+            this.MapScreener.setVariables();
+            this.QuadsKeeper.resetQuadrants();
+
+            this.GamesRunner.play();
+
+            this.addPlayer();
+            this.addFloor();
+            this.addStars();
         }
 
         /**
@@ -231,30 +329,29 @@ module Unisquirt {
         }
 
 
-        /* Map sets
+        /* Graphics utilities
         */
 
         /**
-         * Sets the game state to the "Night" map and "Sky" location, resetting all 
-         * Things, inputs, and other previous game state in the process.
+         * Generates a black-blue-indigo gradient from the top-center of the screen
+         * to the bottom-right for use as a PixelDrawr background.
+         * 
+         * @returns The resultant CanvasGradient.
          */
-        setMap(): void {
-            this.AudioPlayer.clearAll();
-            this.GroupHolder.clearArrays();
-            this.InputWriter.restartHistory();
-            this.MapScreener.clearScreen();
-            this.TimeHandler.cancelAllEvents();
+        createNightGradient(): CanvasGradient {
+            var context: CanvasRenderingContext2D = this.canvas.getContext("2d"),
+                background = context.createLinearGradient(
+                    this.MapScreener.width / 2,
+                    0,
+                    this.MapScreener.width,
+                    this.MapScreener.height);
 
-            this.MapsHandler.setMap("Night", "Sky");
+            background.addColorStop(0.14, "#000000");
+            background.addColorStop(0.56, "#000014");
+            background.addColorStop(0.84, "#140021");
+            background.addColorStop(1, "#210021");
 
-            this.MapScreener.setVariables();
-            this.QuadsKeeper.resetQuadrants();
-
-            this.GamesRunner.play();
-
-            this.addPlayer();
-            this.addFloor();
-            this.addStars();
+            return background;
         }
     }
 }
