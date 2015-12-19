@@ -6,9 +6,9 @@ module Unisquirt {
     Unisquirt.settings.maps = {
         "mapDefault": "Night",
         "locationDefault": "Sky",
-        "groupTypes": [],
+        "groupTypes": ["Particle", "Text", "Character", "Solid", "Scenery"],
         "screenVariables": {},
-        "onSpawn": console.log.bind(console, "Spawning:"),
+        "onSpawn": Unisquirt.prototype.addPreThing,
         "macros": {},
         "entrances": {},
         "library": {
@@ -16,7 +16,9 @@ module Unisquirt {
                 "name": "Night",
                 "locationDefault": "Sky",
                 "locations": {
-                    "Sky": {}
+                    "Sky": {
+                        "area": "Sky"
+                    }
                 },
                 "areas": {
                     "Sky": {

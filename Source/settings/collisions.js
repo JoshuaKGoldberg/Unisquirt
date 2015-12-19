@@ -3,7 +3,7 @@ var Unisquirt;
 (function (Unisquirt) {
     "use strict";
     Unisquirt.Unisquirt.settings.collisions = {
-        "groupNames": [],
+        "groupNames": ["Particle", "Text", "Character", "Solid", "Scenery"],
         "globalCheckGenerators": {},
         "hitCheckGenerators": {},
         "hitFunctionGenerators": {}

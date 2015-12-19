@@ -50,9 +50,29 @@ module Unisquirt {
         };
 
         /**
+         * Static unitsize of 4 for Thing sizes.
+         */
+        public static unitsize: number = 4;
+
+        /**
+         * Static scale of 4 for pixel expansion.
+         */
+        public static scale: number = 4;
+
+        /**
+         * Internal reference to the static unitsize.
+         */
+        public unitsize: number;
+
+        /**
          * Internal reference to the static settings.
          */
         public settings: GameStartr.IGameStartrStoredSettings;
+
+        /**
+         * The Thing being controlled by the user.
+         */
+        public player: IPlayer;
 
         /**
          * Initializes a new instance of the Unisquirt class.
@@ -62,7 +82,147 @@ module Unisquirt {
         constructor(settings: GameStartr.IGameStartrSettings) {
             this.settings = Unisquirt.settings;
 
-            super(settings);
+            super(
+                this.proliferate(
+                    {
+                        "constantsSource": Unisquirt,
+                        "constants": ["unitsize", "scale"]
+                    },
+                    settings));
+        }
+
+
+        /* Resets
+        */
+
+        /**
+         * Sets this.ObjectMaker.
+         * 
+         * Because many Thing functions require access to other Unisquirt modules, each is
+         * given a reference to this container Unisquirt via properties.thing.Unisquirt. 
+         * 
+         * @param Unisquirter   The Unisquirt being reset.
+         * @param settings   Static reset settings being passed to all reset Functions.
+         */
+        resetObjectMaker(Unisquirter: Unisquirt, settings: GameStartr.IGameStartrSettings): void {
+            Unisquirter.ObjectMaker = new ObjectMakr.ObjectMakr(
+                Unisquirter.proliferate(
+                    {
+                        "properties": {
+                            "Quadrant": {
+                                "EightBitter": Unisquirter,
+                                "GameStarter": Unisquirter,
+                                "Unisquirt": Unisquirter
+                            },
+                            "Thing": {
+                                "EightBitter": Unisquirter,
+                                "GameStarter": Unisquirter,
+                                "Unisquirt": Unisquirter
+                            }
+                        }
+                    },
+                    Unisquirter.settings.objects));
+        }
+
+        /**
+         * Sets this.container via the parent GameStartr resetContainer, then tells
+         * the PixelDrawer which Thing groups are to be drawn.
+         * 
+         * @param Unisquirter   The Unisquirter being reset.
+         * @param settings   Any additional settings to pass to super.resetContainer.
+         */
+        resetContainer(Unisquirter: Unisquirt, settings: GameStartr.IGameStartrSettings): void {
+            super.resetContainer(Unisquirter, settings);
+
+            Unisquirter.PixelDrawer.setThingArrays([
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Scenery"),
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Solid"),
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Character"),
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Text"),
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Particle")
+            ]);
+        }
+
+
+        /* Global manipulations
+        */
+
+        /**
+         * Completely restarts the game.
+         */
+        gameStart(): void {
+            this.PixelDrawer.setBackground("Black");
+            this.setMap();
+        }
+
+        /**
+         * Slight addition to the GameStartr thingProcess Function. The Thing's hit
+         * check type is cached immediately.
+         */
+        thingProcess(thing: IThing, title: string, settings: any, defaults: any): void {
+            super.thingProcess(thing, title, settings, defaults);
+
+            // ThingHittr becomes very non-performant if Functions aren't generated
+            // for each Thing constructor (optimization does not respect prototypal 
+            // inheritance, sadly).
+            thing.GameStarter.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+        }
+
+        /**
+         * Adds a Thing via addPreThing based on the specifications in a PreThing.
+         * This is done relative to MapScreener.left and MapScreener.top.
+         * 
+         * @param prething
+         */
+        addPreThing(prething: MapsCreatr.IPreThing): void {
+            var thing: IThing = <IThing>prething.thing;
+
+            thing.GameStarter.addThing(
+                thing,
+                prething.left * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.left,
+                prething.top * thing.GameStarter.unitsize - thing.GameStarter.MapScreener.top);
+        }
+
+        /**
+         * Adds a new Player Thing to the game, centered horizontally and 16 in-game pixels
+         * from the bottom vertically, and sets it as .player.
+         * 
+         * @returns The newly created Thing.
+         */
+        addPlayer(): IPlayer {
+            var player: IPlayer = this.player = <IPlayer>this.ObjectMaker.make("Player");
+
+            this.addThing(
+                player,
+                (this.MapScreener.width - player.width * this.unitsize) / 2,
+                this.MapScreener.height - (player.height + 16) * this.unitsize);
+
+            return player;
+        }
+
+
+        /* Map sets
+        */
+
+        /**
+         * Sets the game state to the "Night" map and "Sky" location, resetting all 
+         * Things, inputs, and other previous game state in the process.
+         */
+        setMap(): void {
+            this.AudioPlayer.clearAll();
+            this.GroupHolder.clearArrays();
+            this.InputWriter.restartHistory();
+            this.MapScreener.clearScreen();
+            this.TimeHandler.cancelAllEvents();
+
+            this.MapsHandler.setMap("Night", "Sky");
+
+            this.MapScreener.setVariables();
+            this.QuadsKeeper.resetQuadrants();
+            
+            this.addPlayer();
+
+            this.GamesRunner.play();
         }
     }
 }

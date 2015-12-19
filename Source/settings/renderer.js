@@ -3,6 +3,6 @@ var Unisquirt;
 (function (Unisquirt) {
     "use strict";
     Unisquirt.Unisquirt.settings.renderer = {
-        "groupNames": []
+        "groupNames": ["Particle", "Character", "Text", "Solid", "Scenery"]
     };
 })(Unisquirt || (Unisquirt = {}));
