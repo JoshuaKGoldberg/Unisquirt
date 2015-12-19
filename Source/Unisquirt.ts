@@ -200,6 +200,36 @@ module Unisquirt {
             return player;
         }
 
+        /**
+         * Adds a Floor Thing stretched across the bottom of the map.
+         */
+        addFloor(): void {
+            this.addThing(
+                this.ObjectMaker.make(
+                    "Floor",
+                    {
+                        "width": this.MapScreener.width
+                    }),
+                0,
+                this.MapScreener.height - (16) * this.unitsize);
+        }
+
+        /**
+         * Adds Star Things scattered across the sky randomly.
+         */
+        addStars(): void {
+            var distanceBetween: number = this.unitsize * this.MathDecider.getConstant("starDistance"),
+                starColumns: number = 1 + this.MapScreener.width / distanceBetween,
+                left: number,
+                top: number;
+
+            for (left = -this.NumberMaker.randomInt(starColumns); left < this.MapScreener.width; left += distanceBetween) {
+                top = this.NumberMaker.randomIntWithin(this.unitsize * -7, this.MapScreener.height);
+
+                this.addThing("Star", left, top);
+            }
+        }
+
 
         /* Map sets
         */
@@ -219,10 +249,12 @@ module Unisquirt {
 
             this.MapScreener.setVariables();
             this.QuadsKeeper.resetQuadrants();
-            
-            this.addPlayer();
 
             this.GamesRunner.play();
+
+            this.addPlayer();
+            this.addFloor();
+            this.addStars();
         }
     }
 }

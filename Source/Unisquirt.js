@@ -117,6 +117,24 @@ var Unisquirt;
             this.addThing(player, (this.MapScreener.width - player.width * this.unitsize) / 2, this.MapScreener.height - (player.height + 16) * this.unitsize);
             return player;
         };
+        /**
+         * Adds a Floor Thing stretched across the bottom of the map.
+         */
+        Unisquirt.prototype.addFloor = function () {
+            this.addThing(this.ObjectMaker.make("Floor", {
+                "width": this.MapScreener.width
+            }), 0, this.MapScreener.height - (16) * this.unitsize);
+        };
+        /**
+         * Adds Star Things scattered across the sky randomly.
+         */
+        Unisquirt.prototype.addStars = function () {
+            var distanceBetween = this.unitsize * this.MathDecider.getConstant("starDistance"), starColumns = 1 + this.MapScreener.width / distanceBetween, left, top;
+            for (left = -this.NumberMaker.randomInt(starColumns); left < this.MapScreener.width; left += distanceBetween) {
+                top = this.NumberMaker.randomIntWithin(this.unitsize * -7, this.MapScreener.height);
+                this.addThing("Star", left, top);
+            }
+        };
         /* Map sets
         */
         /**
@@ -132,8 +150,10 @@ var Unisquirt;
             this.MapsHandler.setMap("Night", "Sky");
             this.MapScreener.setVariables();
             this.QuadsKeeper.resetQuadrants();
-            this.addPlayer();
             this.GamesRunner.play();
+            this.addPlayer();
+            this.addFloor();
+            this.addStars();
         };
         // For the sake of reset functions, constants are stored as members of the 
         // Unisquirt class itself - this allows prototype setters to use 

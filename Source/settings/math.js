@@ -2,5 +2,9 @@
 var Unisquirt;
 (function (Unisquirt) {
     "use strict";
-    Unisquirt.Unisquirt.settings.math = {};
+    Unisquirt.Unisquirt.settings.math = {
+        "constants": {
+            "starDistance": 7
+        }
+    };
 })(Unisquirt || (Unisquirt = {}));

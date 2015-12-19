@@ -3,5 +3,9 @@
 module Unisquirt {
     "use strict";
 
-    Unisquirt.settings.math = {};
+    Unisquirt.settings.math = {
+        "constants": {
+            "starDistance": 7
+        }
+    };
 }

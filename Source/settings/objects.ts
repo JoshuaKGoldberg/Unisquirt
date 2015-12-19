@@ -16,8 +16,12 @@ module Unisquirt {
                     "Player": {}
                 },
                 "Particle": {},
-                "Scenery": {},
-                "Solid": {},
+                "Scenery": {
+                    "Star": {}
+                },
+                "Solid": {
+                    "Floor": {}
+                },
                 "Text": {}
             }
         },
@@ -46,8 +50,19 @@ module Unisquirt {
             "Scenery": {
                 "groupType": "Scenery"
             },
+            "Star": {
+                "spriteCycleSynched": [
+                    ["one", "two", "three", "two"],
+                    "shimmer",
+                    70
+                ]
+            },
             "Solid": {
-                "groupType": "Solid"
+                "groupType": "Solid",
+                "repeat": true
+            },
+            "Floor": {
+                "height": 16
             },
             "Text": {
                 "groupType": "Text"

@@ -3,5 +3,8 @@
 module Unisquirt {
     "use strict";
 
-    Unisquirt.settings.events = {};
+    Unisquirt.settings.events = {
+        "keyOnClassCycleStart": "onThingAdd",
+        "timingDefault": 7
+    };
 }
