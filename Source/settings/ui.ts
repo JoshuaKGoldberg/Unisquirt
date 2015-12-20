@@ -10,8 +10,8 @@ module Unisquirt {
         "globalName": "Unisquirter",
         "sizes": {
             "Full Screen": {
-                "width": "Infinity",
-                "height": "Infinity"
+                "width": window.innerWidth,
+                "height": window.innerHeight
             }
         },
         "sizeDefault": "Full Screen",
