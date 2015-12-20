@@ -13,6 +13,7 @@ module Unisquirt {
             "Quadrant": {},
             "Thing": {
                 "Character": {
+                    "Cloud": {},
                     "Player": {}
                 },
                 "Particle": {},
@@ -43,10 +44,16 @@ module Unisquirt {
             "Character": {
                 "groupType": "Character"
             },
+            "Cloud": {
+                "width": 21,
+                "height": 21,
+                "onThingAdded": Unisquirt.prototype.spawnCloud
+            },
             "Player": {
                 "width": 39,
                 "height": 31,
-                "canJump": true
+                "canJump": true,
+                "player": true
             },
             "Particle": {
                 "groupType": "Particle"

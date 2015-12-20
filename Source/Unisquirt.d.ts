@@ -14,6 +14,11 @@ declare module Unisquirt {
          * A Solid this is resting on, if any.
          */
         resting?: IThing;
+
+        /**
+         * Whether this is an IPlayer.
+         */
+        player?: boolean;
     }
 
     /**
@@ -65,5 +70,12 @@ declare module Unisquirt {
          * The Thing being controlled by the user.
          */
         player: IPlayer;
+        
+        /**
+         * Kills a Player. For now, this just freezes it in place and disables inputs.
+         * 
+         * @param player   The Player being killed.
+         */
+        killPlayer(player: IPlayer): void;
     }
 }

@@ -15,7 +15,6 @@ module Unisquirt {
             },
             function () {
                 this.maintainMoving(
-                    this.GroupHolder.getSolidGroup(),
                     this.GroupHolder.getCharacterGroup(),
                     this.GroupHolder.getSceneryGroup());
             },

@@ -11,12 +11,14 @@ var Unisquirt;
         },
         "hitCheckGenerators": {
             "Character": {
-                "Solid": Unisquirt.Unisquirt.prototype.generateIsCharacterTouchingSolid
+                "Solid": Unisquirt.Unisquirt.prototype.generateIsCharacterTouchingSolid,
+                "Character": Unisquirt.Unisquirt.prototype.generateIsCharacterTouchingCharacter
             }
         },
         "hitFunctionGenerators": {
             "Character": {
                 "Solid": Unisquirt.Unisquirt.prototype.generateHitCharacterSolid,
+                "Character": Unisquirt.Unisquirt.prototype.generateHitCharacterCharacter
             }
         }
     };

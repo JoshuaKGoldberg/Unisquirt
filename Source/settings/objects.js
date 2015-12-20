@@ -12,6 +12,7 @@ var Unisquirt;
             "Quadrant": {},
             "Thing": {
                 "Character": {
+                    "Cloud": {},
                     "Player": {}
                 },
                 "Particle": {},
@@ -42,10 +43,16 @@ var Unisquirt;
             "Character": {
                 "groupType": "Character"
             },
+            "Cloud": {
+                "width": 21,
+                "height": 21,
+                "onThingAdded": Unisquirt.Unisquirt.prototype.spawnCloud
+            },
             "Player": {
                 "width": 39,
                 "height": 31,
-                "canJump": true
+                "canJump": true,
+                "player": true
             },
             "Particle": {
                 "groupType": "Particle"

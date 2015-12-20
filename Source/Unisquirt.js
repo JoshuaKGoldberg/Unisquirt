@@ -126,7 +126,7 @@ var Unisquirt;
          * @param Unisquirter   The governing Unisquirt.
          */
         Unisquirt.prototype.keyDownLeft = function (Unisquirter) {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
             var player = Unisquirter.player;
@@ -143,7 +143,7 @@ var Unisquirt;
          * @param Unisquirter   The governing Unisquirt.
          */
         Unisquirt.prototype.keyDownRight = function (Unisquirter) {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
             var player = Unisquirter.player;
@@ -160,7 +160,7 @@ var Unisquirt;
          * @param Unisquirter   The governing Unisquirt.
          */
         Unisquirt.prototype.keyDownSpace = function (Unisquirter) {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
             var player = Unisquirter.player;
@@ -178,6 +178,7 @@ var Unisquirt;
                 player.xvel += Unisquirter.unitsize * 1.4 * (player.flipHoriz ? -1 : 1);
                 player.yvel -= Unisquirter.unitsize * 0.7;
             }
+            Unisquirter.addCloudBehindPlayer(player);
         };
         /**
          * Reacts to the left key being raised. The player's left key is marked as up.
@@ -229,6 +230,7 @@ var Unisquirt;
                     }
                     this.shiftHoriz(thing, thing.xvel || 0);
                     this.shiftVert(thing, thing.yvel || 0);
+                    this.ThingHitter.checkHitsOf[thing.title](thing);
                 }
             }
         };
@@ -239,6 +241,9 @@ var Unisquirt;
          * @param player   A Unisquirt's player.
          */
         Unisquirt.prototype.maintainPlayer = function (player) {
+            if (!player.alive) {
+                return;
+            }
             // Horizontal slowdown
             if (Math.abs(player.xvel) > this.unitsize / 4) {
                 if (player.resting) {
@@ -268,7 +273,15 @@ var Unisquirt;
             if (!player.resting && player.yvel < this.unitsize * 3.5) {
                 player.yvel += this.unitsize / 7;
             }
-            player.Unisquirter.ThingHitter.checkHitsOf[player.title](player);
+            // Top map boundary
+            if (player.yvel < 0) {
+                if (player.bottom < player.Unisquirter.MapScreener.top) {
+                    player.yvel = 0;
+                }
+                else if (player.top < player.Unisquirter.MapScreener.top) {
+                    player.yvel *= .84;
+                }
+            }
         };
         /* Collision detection
         */
@@ -306,18 +319,75 @@ var Unisquirt;
              * @param other   A Solid that thing may be landing on.
              */
             return function isCharacterTouchingSolid(thing, other) {
-                return (thing.left <= other.right
+                return (!thing.nocollide && !other.nocollide
+                    && thing.left <= other.right
                     && thing.right >= other.left
                     && other.top - thing.bottom < thing.Unisquirter.unitsize * 2);
             };
         };
         /**
+         * Function generator for the generic isCharacterTouchingCharacter checker.
+         * This is used repeately by the ThingHittr to generate separately optimized
+         * Functions for different Thing types.
          *
+         * @returns A Function that determines if a Character and Character are hitting.
+         */
+        Unisquirt.prototype.generateIsCharacterTouchingCharacter = function () {
+            /**
+             * Generic checker for whether a Character is hitting a Solid.
+             *
+             * @param thing   A Character that may be hitting other.
+             * @param other   A Character that may be hitting thing.
+             */
+            return function isCharacterTouchingCharacter(thing, other) {
+                return (!thing.nocollide && !other.nocollide
+                    && thing.right - thing.Unisquirter.unitsize > other.left
+                    && thing.left + thing.Unisquirter.unitsize < other.right
+                    && thing.bottom >= other.top
+                    && thing.top <= other.bottom);
+            };
+        };
+        /**
+         *Function generator for the generic hitCharacterSolid callback. This is
+         * used repeatedly by ThingHittr to generate separately optimized Functions
+         * for different Thing types.
+         *
+         * @returns A Function for when a Character hits a Solid.
          */
         Unisquirt.prototype.generateHitCharacterSolid = function () {
+            /**
+             * A callback for when a Character hits a Solid.
+             *
+             * @param thing   A Character hitting other.
+             * @param other   A solid being hit by thing.
+             */
             return function hitCharacterSolid(thing, other) {
                 thing.resting = other;
                 thing.Unisquirter.setBottom(thing, other.top);
+            };
+        };
+        /**
+         * Function generator for the generic hitCharacterCharacter callback. This is
+         * used repeatedly by ThingHittr to generate separately optimized Functions
+         * for different Thing types.
+         *
+         * @returns A Function for when a Character hits a Character.
+         */
+        Unisquirt.prototype.generateHitCharacterCharacter = function () {
+            /**
+             * A callback for when a Character hits a Character. If one is a Player, it's
+             * killed.
+             *
+             * @param thing   A Character hitting other.
+             * @param other   A solid being hit by thing.
+             */
+            return function hitCharacterCharacter(thing, other) {
+                if (thing.player) {
+                    thing.Unisquirter.killPlayer(thing);
+                }
+                else if (other.player) {
+                    thing.Unisquirter.killPlayer(other);
+                }
             };
         };
         /* Spawning
@@ -332,6 +402,36 @@ var Unisquirt;
             thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.117, -.007);
             thing.Unisquirter.TimeHandler.addClassCycle(thing, ["one", "two", "three"], "shimmer", thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
         };
+        /**
+         * Spawn Function for a Cloud. It immediately starts fading out and floating
+         * upwards, and is killed when it's completely faded.
+         *
+         * @param thing   The Cloud being spawned.
+         */
+        Unisquirt.prototype.spawnCloud = function (thing) {
+            var yvel = -thing.Unisquirter.unitsize / 7;
+            thing.nocollide = true;
+            thing.opacity = thing.Unisquirter.NumberMaker.randomWithin(.7, .98);
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                thing.nocollide = false;
+            }, 35);
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                if (thing.opacity <= .07) {
+                    thing.Unisquirter.killNormal(thing);
+                    return true;
+                }
+                if (thing.xvel) {
+                    thing.xvel *= .91;
+                    if (Math.abs(thing.xvel) < thing.Unisquirter.unitsize / 8) {
+                        thing.xvel = 0;
+                    }
+                }
+                thing.opacity -= .0014;
+                thing.Unisquirter.shiftVert(thing, yvel);
+                yvel *= .99;
+                return false;
+            }, 1, Infinity);
+        };
         /* Movement
         */
         /**
@@ -343,6 +443,39 @@ var Unisquirt;
             if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
                 thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
             }
+        };
+        /* Actions
+        */
+        /**
+         * Adds a Cloud just behind a Player, based on where the Player is facing.
+         *
+         * @param player   A Player emitting a Cloud.
+         * @returns The newly created Cloud.
+         */
+        Unisquirt.prototype.addCloudBehindPlayer = function (player) {
+            var cloud = this.ObjectMaker.make("Cloud", {
+                "xvel": player.xvel * -.35
+            });
+            if (player.flipHoriz) {
+                this.addThing(cloud, player.right - cloud.width * this.unitsize / 2, player.top + player.height * this.unitsize / 2);
+            }
+            else {
+                this.addThing(cloud, player.left - cloud.width * this.unitsize / 2, player.top + player.height * this.unitsize / 2);
+            }
+            cloud.yvel += player.yvel / 10;
+            return cloud;
+        };
+        /* Deaths
+        */
+        /**
+         * Kills a Player. For now, this just freezes it in place and disables inputs.
+         *
+         * @param player   The Player being killed.
+         */
+        Unisquirt.prototype.killPlayer = function (player) {
+            player.alive = false;
+            player.xvel = 0;
+            player.yvel = 0;
         };
         /* Map sets
         */

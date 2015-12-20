@@ -207,7 +207,7 @@ module Unisquirt {
          * @param Unisquirter   The governing Unisquirt.
          */
         keyDownLeft(Unisquirter: Unisquirt): void {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
 
@@ -227,7 +227,7 @@ module Unisquirt {
          * @param Unisquirter   The governing Unisquirt.
          */
         keyDownRight(Unisquirter: Unisquirt): void {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
 
@@ -247,7 +247,7 @@ module Unisquirt {
          * @param Unisquirter   The governing Unisquirt.
          */
         keyDownSpace(Unisquirter: Unisquirt): void {
-            if (Unisquirter.GamesRunner.getPaused()) {
+            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
                 return;
             }
 
@@ -271,6 +271,8 @@ module Unisquirt {
                 player.xvel += Unisquirter.unitsize * 1.4 * (player.flipHoriz ? -1 : 1);
                 player.yvel -= Unisquirter.unitsize * 0.7;
             }
+
+            Unisquirter.addCloudBehindPlayer(player);
         }
 
         /**
@@ -330,6 +332,7 @@ module Unisquirt {
 
                     this.shiftHoriz(thing, thing.xvel || 0);
                     this.shiftVert(thing, thing.yvel || 0);
+                    this.ThingHitter.checkHitsOf[thing.title](thing);
                 }
             }
         }
@@ -341,6 +344,10 @@ module Unisquirt {
          * @param player   A Unisquirt's player.
          */
         maintainPlayer(player: IPlayer): void {
+            if (!player.alive) {
+                return;
+            }
+
             // Horizontal slowdown
             if (Math.abs(player.xvel) > this.unitsize / 4) {
                 if (player.resting) {
@@ -372,7 +379,14 @@ module Unisquirt {
                 player.yvel += this.unitsize / 7;
             }
 
-            player.Unisquirter.ThingHitter.checkHitsOf[player.title](player);
+            // Top map boundary
+            if (player.yvel < 0) {
+                if (player.bottom < player.Unisquirter.MapScreener.top) {
+                    player.yvel = 0;
+                } else if (player.top < player.Unisquirter.MapScreener.top) {
+                    player.yvel *= .84;
+                }
+            }
         }
 
 
@@ -415,19 +429,78 @@ module Unisquirt {
              */
             return function isCharacterTouchingSolid(thing: ICharacter, other: IThing): boolean {
                 return (
-                    thing.left <= other.right
+                    !thing.nocollide && !other.nocollide
+                    && thing.left <= other.right
                     && thing.right >= other.left
                     && other.top - thing.bottom < thing.Unisquirter.unitsize * 2);
             }
         }
 
         /**
-         *
+         * Function generator for the generic isCharacterTouchingCharacter checker. 
+         * This is used repeately by the ThingHittr to generate separately optimized 
+         * Functions for different Thing types.
+         * 
+         * @returns A Function that determines if a Character and Character are hitting.
+         */
+        generateIsCharacterTouchingCharacter(): ThingHittr.IThingHitCheck {
+            /**
+             * Generic checker for whether a Character is hitting a Solid.
+             * 
+             * @param thing   A Character that may be hitting other.
+             * @param other   A Character that may be hitting thing.
+             */
+            return function isCharacterTouchingCharacter(thing: ICharacter, other: ICharacter): boolean {
+                return (
+                    !thing.nocollide && !other.nocollide
+                    && thing.right - thing.Unisquirter.unitsize > other.left
+                    && thing.left + thing.Unisquirter.unitsize < other.right
+                    && thing.bottom >= other.top
+                    && thing.top <= other.bottom);
+            }
+        }
+
+        /**
+         *Function generator for the generic hitCharacterSolid callback. This is 
+         * used repeatedly by ThingHittr to generate separately optimized Functions
+         * for different Thing types.
+         * 
+         * @returns A Function for when a Character hits a Solid.
          */
         generateHitCharacterSolid(): ThingHittr.IThingHitFunction {
+            /**
+             * A callback for when a Character hits a Solid.
+             * 
+             * @param thing   A Character hitting other.
+             * @param other   A solid being hit by thing.
+             */
             return function hitCharacterSolid(thing: ICharacter, other: IThing): void {
                 thing.resting = other;
                 thing.Unisquirter.setBottom(thing, other.top);
+            }
+        }
+
+        /**
+         * Function generator for the generic hitCharacterCharacter callback. This is 
+         * used repeatedly by ThingHittr to generate separately optimized Functions
+         * for different Thing types.
+         * 
+         * @returns A Function for when a Character hits a Character.
+         */
+        generateHitCharacterCharacter(): ThingHittr.IThingHitFunction {
+            /**
+             * A callback for when a Character hits a Character. If one is a Player, it's
+             * killed.
+             * 
+             * @param thing   A Character hitting other.
+             * @param other   A solid being hit by thing.
+             */
+            return function hitCharacterCharacter(thing: ICharacter, other: ICharacter): void {
+                if (thing.player) {
+                    thing.Unisquirter.killPlayer(<IPlayer>thing);
+                } else if (other.player) {
+                    thing.Unisquirter.killPlayer(<IPlayer>other);
+                }
             }
         }
 
@@ -450,6 +523,48 @@ module Unisquirt {
                 thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
         }
 
+        /**
+         * Spawn Function for a Cloud. It immediately starts fading out and floating
+         * upwards, and is killed when it's completely faded.
+         * 
+         * @param thing   The Cloud being spawned.
+         */
+        spawnCloud(thing: IThing): void {
+            var yvel: number = -thing.Unisquirter.unitsize / 7;
+
+            thing.nocollide = true;
+            thing.opacity = thing.Unisquirter.NumberMaker.randomWithin(.7, .98);
+
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): void => {
+                    thing.nocollide = false;
+                },
+                35);
+
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): boolean => {
+                    if (thing.opacity <= .07) {
+                        thing.Unisquirter.killNormal(thing);
+                        return true;
+                    }
+
+                    if (thing.xvel) {
+                        thing.xvel *= .91;
+
+                        if (Math.abs(thing.xvel) < thing.Unisquirter.unitsize / 8) {
+                            thing.xvel = 0;
+                        }
+                    }
+
+                    thing.opacity -= .0014;
+                    thing.Unisquirter.shiftVert(thing, yvel);
+                    yvel *= .99;
+                    return false;
+                },
+                1,
+                Infinity);
+        }
+
 
         /* Movement
         */
@@ -463,6 +578,53 @@ module Unisquirt {
             if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
                 thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
             }
+        }
+
+
+        /* Actions
+        */
+
+        /**
+         * Adds a Cloud just behind a Player, based on where the Player is facing.
+         * 
+         * @param player   A Player emitting a Cloud.
+         * @returns The newly created Cloud.
+         */
+        addCloudBehindPlayer(player: IPlayer): IThing {
+            var cloud: IThing = this.ObjectMaker.make("Cloud", {
+                "xvel": player.xvel * -.35
+            });
+
+            if (player.flipHoriz) {
+                this.addThing(
+                    cloud,
+                    player.right - cloud.width * this.unitsize / 2,
+                    player.top + player.height * this.unitsize / 2);
+            } else {
+                this.addThing(
+                    cloud,
+                    player.left - cloud.width * this.unitsize / 2,
+                    player.top + player.height * this.unitsize / 2);
+            }
+
+            cloud.yvel += player.yvel / 10;
+
+            return cloud;
+        }
+
+
+        /* Deaths
+        */
+
+        /**
+         * Kills a Player. For now, this just freezes it in place and disables inputs.
+         * 
+         * @param player   The Player being killed.
+         */
+        killPlayer(player: IPlayer): void {
+            player.alive = false;
+            player.xvel = 0;
+            player.yvel = 0;
         }
 
 

@@ -12,12 +12,14 @@ module Unisquirt {
         },
         "hitCheckGenerators": {
             "Character": {
-                "Solid": Unisquirt.prototype.generateIsCharacterTouchingSolid
+                "Solid": Unisquirt.prototype.generateIsCharacterTouchingSolid,
+                "Character": Unisquirt.prototype.generateIsCharacterTouchingCharacter
             }
         },
         "hitFunctionGenerators": {
             "Character": {
                 "Solid": Unisquirt.prototype.generateHitCharacterSolid,
+                "Character": Unisquirt.prototype.generateHitCharacterCharacter
             }
         }
     };
