@@ -52,8 +52,8 @@ module Unisquirt {
                 "onThingAdded": Unisquirt.prototype.spawnCloud
             },
             "Player": {
-                "width": 36,
-                "height": 31,
+                "width": 44,
+                "height": 33,
                 "canJump": true,
                 "player": true
             },

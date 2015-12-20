@@ -271,6 +271,7 @@ module Unisquirt {
                 player.yvel -= Unisquirter.unitsize * 0.7;
             }
 
+            Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
         }
 
@@ -356,6 +357,7 @@ module Unisquirt {
                 }
             } else {
                 player.xvel = 0;
+                player.Unisquirter.animatePlayerStopCycles(player);
             }
 
             // Key speed-ups, if on the ground
@@ -367,9 +369,13 @@ module Unisquirt {
                 }
             }
 
-            // Resting re-check
-            if (player.resting && !player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
-                player.resting = undefined;
+            // Resting && trotting re-check
+            if (player.resting) {
+                if (!player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
+                    player.resting = undefined;
+                } else if (player.xvel !== 0 && (!player.cycles || !player.cycles.trotting)) {
+                    player.Unisquirter.animatePlayerStartTrotting(player);
+                }
             }
 
             // Vertical falling
@@ -390,7 +396,9 @@ module Unisquirt {
             this.checkPlayerSidesOverflow(player);
 
             // Rainbow spawning
-            this.addRainbowBehindPlayer(player);
+            if (player.xvel !== 0 && player.yvel !== 0) {
+                this.addRainbowBehindPlayer(player);
+            }
         }
 
         /**
@@ -538,9 +546,6 @@ module Unisquirt {
                 } else {
                     return;
                 }
-
-                console.log("got", thing.title, thing.opacity, thing.nocollide, other.title, other.opacity, other.nocollide);
-                debugger;
             }
         }
 
@@ -579,14 +584,19 @@ module Unisquirt {
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): void => {
                     thing.nocollide = false;
+                },
+                14);
+
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): void => {
                     isFading = true;
                 },
-                35);
+                117);
 
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): boolean => {
                     if (isFading) {
-                        thing.opacity -= .035;
+                        thing.opacity -= .014;
                         if (thing.opacity < .14) {
                             thing.nocollide = true;
                         }
@@ -618,11 +628,15 @@ module Unisquirt {
          */
         spawnRainbow(thing: IThing): void {
             thing.Unisquirter.TimeHandler.addEventInterval(
-                (): void => {
+                (): boolean => {
                     thing.opacity -= .1;
+
                     if (thing.opacity <= 0) {
                         thing.Unisquirter.killNormal(thing);
+                        return true;
                     }
+
+                    return false;
                 },
                 1,
                 Infinity);
@@ -658,6 +672,49 @@ module Unisquirt {
             if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
                 thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
             }
+        }
+
+
+        /* Animations
+        */
+
+        animatePlayerStartTrotting(player: IPlayer): void {
+            if (player.cycles && player.cycles.trotting) {
+                return;
+            }
+
+            player.Unisquirter.removeClass(player, "running");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
+
+            player.Unisquirter.TimeHandler.addClassCycle(
+                player,
+                ["one", "two", "three", "four", "five", "six", "seven", "eight"],
+                "trotting",
+                5);
+
+            player.Unisquirter.addClass(player, "trotting");
+        }
+
+        animatePlayerStartRunning(player: IPlayer): void {
+            if (player.cycles && player.cycles.running) {
+                return;
+            }
+
+            player.Unisquirter.removeClass(player, "trotting");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
+
+            player.Unisquirter.TimeHandler.addClassCycle(
+                player,
+                ["one", "two", "three", "four", "five", "six"],
+                "running",
+                4);
+            player.Unisquirter.addClass(player, "running");
+        }
+
+        animatePlayerStopCycles(player: IPlayer): void {
+            player.Unisquirter.removeClasses(player, "trotting", "running");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         }
 
 
@@ -742,10 +799,10 @@ module Unisquirt {
 
             if (player.flipHoriz) {
                 left = referenceThing.right - this.unitsize / 2;
-                left -= (thing.width + 2) * this.unitsize / 2;
+                left -= (thing.width + 11) * this.unitsize / 2;
             } else {
                 left = referenceThing.left + this.unitsize / 2;
-                left += thing.width * this.unitsize / 2;
+                left += (thing.width + 10) * this.unitsize / 2;
             }
 
             top = referenceThing.top + 13 * this.unitsize;

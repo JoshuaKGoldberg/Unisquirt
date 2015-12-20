@@ -7,6 +7,7 @@ declare module Unisquirt {
      */
     export interface IThing extends GameStartr.IThing {
         Unisquirter: IUnisquirt;
+        cycles?: TimeHandlr.ITimeCycles;
     }
 
     export interface ICharacter extends IThing {
@@ -19,6 +20,16 @@ declare module Unisquirt {
          * Whether this is an IPlayer.
          */
         player?: boolean;
+
+        /**
+         * Whether this is currently trotting (walking on the ground).
+         */
+        trotting?: boolean;
+
+        /**
+         * Whether this is currently running (flying through the air).
+         */
+        running?: boolean;
     }
 
     /**
@@ -39,6 +50,15 @@ declare module Unisquirt {
          * A 
          */
         shadow?: IPlayer;
+
+        /**
+         *
+         */
+        cycles?: {
+            trotting: TimeHandlr.ITimeCycle;
+            running: TimeHandlr.ITimeCycle;
+            [i: string]: TimeHandlr.ITimeCycle;
+        }
     }
 
     /**
@@ -92,5 +112,11 @@ declare module Unisquirt {
         killPlayerShadow(thing: IPlayer, replaceWithPlayer?: boolean): void;
 
         getPlayerBehindPosition(player: IPlayer, thing: IThing): [number, number];
+
+        animatePlayerStartTrotting(player: IPlayer): void;
+
+        animatePlayerStartRunning(player: IPlayer): void;
+
+        animatePlayerStopCycles(player: IPlayer): void;
     }
 }

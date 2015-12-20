@@ -177,6 +177,7 @@ var Unisquirt;
                 player.xvel += Unisquirter.unitsize * 1.4 * (player.flipHoriz ? -1 : 1);
                 player.yvel -= Unisquirter.unitsize * 0.7;
             }
+            Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
         };
         /**
@@ -254,6 +255,7 @@ var Unisquirt;
             }
             else {
                 player.xvel = 0;
+                player.Unisquirter.animatePlayerStopCycles(player);
             }
             // Key speed-ups, if on the ground
             if (player.resting) {
@@ -264,9 +266,14 @@ var Unisquirt;
                     player.xvel -= player.Unisquirter.unitsize / 1.17;
                 }
             }
-            // Resting re-check
-            if (player.resting && !player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
-                player.resting = undefined;
+            // Resting && trotting re-check
+            if (player.resting) {
+                if (!player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
+                    player.resting = undefined;
+                }
+                else if (player.xvel !== 0 && (!player.cycles || !player.cycles.trotting)) {
+                    player.Unisquirter.animatePlayerStartTrotting(player);
+                }
             }
             // Vertical falling
             if (!player.resting && player.yvel < this.unitsize * 3.5) {
@@ -284,7 +291,9 @@ var Unisquirt;
             // Map sides overflow
             this.checkPlayerSidesOverflow(player);
             // Rainbow spawning
-            this.addRainbowBehindPlayer(player);
+            if (player.xvel !== 0 && player.yvel !== 0) {
+                this.addRainbowBehindPlayer(player);
+            }
         };
         /**
          *
@@ -421,8 +430,6 @@ var Unisquirt;
                 else {
                     return;
                 }
-                console.log("got", thing.title, thing.opacity, thing.nocollide, other.title, other.opacity, other.nocollide);
-                debugger;
             };
         };
         /* Spawning
@@ -449,11 +456,13 @@ var Unisquirt;
             thing.opacity = thing.Unisquirter.NumberMaker.randomWithin(.7, .98);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 thing.nocollide = false;
+            }, 14);
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 isFading = true;
-            }, 35);
+            }, 117);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 if (isFading) {
-                    thing.opacity -= .035;
+                    thing.opacity -= .014;
                     if (thing.opacity < .14) {
                         thing.nocollide = true;
                     }
@@ -481,7 +490,9 @@ var Unisquirt;
                 thing.opacity -= .1;
                 if (thing.opacity <= 0) {
                     thing.Unisquirter.killNormal(thing);
+                    return true;
                 }
+                return false;
             }, 1, Infinity);
         };
         /**
@@ -507,6 +518,31 @@ var Unisquirt;
             if (thing.bottom <= thing.Unisquirter.MapScreener.top) {
                 thing.Unisquirter.setTop(thing, thing.Unisquirter.MapScreener.bottom);
             }
+        };
+        /* Animations
+        */
+        Unisquirt.prototype.animatePlayerStartTrotting = function (player) {
+            if (player.cycles && player.cycles.trotting) {
+                return;
+            }
+            player.Unisquirter.removeClass(player, "running");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
+            player.Unisquirter.TimeHandler.addClassCycle(player, ["one", "two", "three", "four", "five", "six", "seven", "eight"], "trotting", 5);
+            player.Unisquirter.addClass(player, "trotting");
+        };
+        Unisquirt.prototype.animatePlayerStartRunning = function (player) {
+            if (player.cycles && player.cycles.running) {
+                return;
+            }
+            player.Unisquirter.removeClass(player, "trotting");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
+            player.Unisquirter.TimeHandler.addClassCycle(player, ["one", "two", "three", "four", "five", "six"], "running", 4);
+            player.Unisquirter.addClass(player, "running");
+        };
+        Unisquirt.prototype.animatePlayerStopCycles = function (player) {
+            player.Unisquirter.removeClasses(player, "trotting", "running");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
+            player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         };
         /* Actions
         */
@@ -569,11 +605,11 @@ var Unisquirt;
             }
             if (player.flipHoriz) {
                 left = referenceThing.right - this.unitsize / 2;
-                left -= (thing.width + 2) * this.unitsize / 2;
+                left -= (thing.width + 11) * this.unitsize / 2;
             }
             else {
                 left = referenceThing.left + this.unitsize / 2;
-                left += thing.width * this.unitsize / 2;
+                left += (thing.width + 10) * this.unitsize / 2;
             }
             top = referenceThing.top + 13 * this.unitsize;
             return [left, top];
