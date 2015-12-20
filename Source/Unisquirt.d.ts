@@ -117,6 +117,6 @@ declare module Unisquirt {
 
         animatePlayerStartRunning(player: IPlayer): void;
 
-        animatePlayerStopCycles(player: IPlayer): void;
+        animatePlayerStopRunning(player: IPlayer): void;
     }
 }

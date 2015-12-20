@@ -255,7 +255,7 @@ var Unisquirt;
             }
             else {
                 player.xvel = 0;
-                player.Unisquirter.animatePlayerStopCycles(player);
+                player.Unisquirter.animatePlayerStopRunning(player);
             }
             // Key speed-ups, if on the ground
             if (player.resting) {
@@ -266,13 +266,13 @@ var Unisquirt;
                     player.xvel -= player.Unisquirter.unitsize / 1.17;
                 }
             }
-            // Resting && trotting re-check
+            // Resting && running re-check
             if (player.resting) {
                 if (!player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
                     player.resting = undefined;
                 }
-                else if (player.xvel !== 0 && (!player.cycles || !player.cycles.trotting)) {
-                    player.Unisquirter.animatePlayerStartTrotting(player);
+                else if (player.xvel !== 0 && (!player.cycles || !player.cycles.running)) {
+                    player.Unisquirter.animatePlayerStartRunning(player);
                 }
             }
             // Vertical falling
@@ -441,7 +441,7 @@ var Unisquirt;
          * @param thing   The Star being spawned.
          */
         Unisquirt.prototype.spawnStar = function (thing) {
-            thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.117, -.007);
+            thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.21, -.007);
             thing.Unisquirter.TimeHandler.addClassCycle(thing, ["one", "two", "three"], "shimmer", thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
         };
         /**
@@ -521,27 +521,15 @@ var Unisquirt;
         };
         /* Animations
         */
-        Unisquirt.prototype.animatePlayerStartTrotting = function (player) {
-            if (player.cycles && player.cycles.trotting) {
-                return;
-            }
-            player.Unisquirter.removeClass(player, "running");
-            player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
-            player.Unisquirter.TimeHandler.addClassCycle(player, ["one", "two", "three", "four", "five", "six", "seven", "eight"], "trotting", 5);
-            player.Unisquirter.addClass(player, "trotting");
-        };
         Unisquirt.prototype.animatePlayerStartRunning = function (player) {
             if (player.cycles && player.cycles.running) {
                 return;
             }
-            player.Unisquirter.removeClass(player, "trotting");
-            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
             player.Unisquirter.TimeHandler.addClassCycle(player, ["one", "two", "three", "four", "five", "six"], "running", 4);
             player.Unisquirter.addClass(player, "running");
         };
-        Unisquirt.prototype.animatePlayerStopCycles = function (player) {
-            player.Unisquirter.removeClasses(player, "trotting", "running");
-            player.Unisquirter.TimeHandler.cancelClassCycle(player, "trotting");
+        Unisquirt.prototype.animatePlayerStopRunning = function (player) {
+            player.Unisquirter.removeClasses(player, "running");
             player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         };
         /* Actions
