@@ -36,6 +36,8 @@ module Unisquirt {
                 "alive": true,
                 "scale": 1,
                 "opacity": 1,
+                "xvel": 0,
+                "yvel": 0,
                 "onMake": Unisquirt.prototype.thingProcess
             },
             "Character": {
@@ -43,7 +45,8 @@ module Unisquirt {
             },
             "Player": {
                 "width": 39,
-                "height": 31
+                "height": 31,
+                "canJump": true
             },
             "Particle": {
                 "groupType": "Particle"

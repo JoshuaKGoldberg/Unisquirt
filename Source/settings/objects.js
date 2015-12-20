@@ -35,6 +35,8 @@ var Unisquirt;
                 "alive": true,
                 "scale": 1,
                 "opacity": 1,
+                "xvel": 0,
+                "yvel": 0,
                 "onMake": Unisquirt.Unisquirt.prototype.thingProcess
             },
             "Character": {
@@ -42,7 +44,8 @@ var Unisquirt;
             },
             "Player": {
                 "width": 39,
-                "height": 31
+                "height": 31,
+                "canJump": true
             },
             "Particle": {
                 "groupType": "Particle"

@@ -125,6 +125,19 @@ module Unisquirt {
         }
 
         /**
+         * Sets this.ThingHitter.
+         * 
+         * @param {FullScreenMario} FSM
+         * @param {Object} customs
+         */
+        resetThingHitter(Unisquirter: Unisquirt, settings: GameStartr.IGameStartrSettings): void {
+            super.resetThingHitter(Unisquirter, settings);
+
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Character");
+        }
+
+        /**
          * Sets this.container via the parent GameStartr resetContainer, then tells
          * the PixelDrawer which Thing groups are to be drawn.
          * 
@@ -184,20 +197,121 @@ module Unisquirt {
         }
 
 
+        /* Input
+        */
+
+        /**
+         * Reacts to the left key being pressed. The player's left key is marked as down,
+         * and its sprite is set to face the left if it isn't already.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyDownLeft(Unisquirter: Unisquirt): void {
+            if (Unisquirter.GamesRunner.getPaused()) {
+                return;
+            }
+
+            var player: IPlayer = Unisquirter.player;
+
+            player.keys.left = true;
+            player.keys.right = false;
+            if (!player.flipHoriz) {
+                Unisquirter.flipHoriz(player);
+            }
+        }
+
+        /**
+         * Reacts to the right key being pressed. The player's right key is marked as down,
+         * and its sprite is set to face the right if it isn't already.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyDownRight(Unisquirter: Unisquirt): void {
+            if (Unisquirter.GamesRunner.getPaused()) {
+                return;
+            }
+
+            var player: IPlayer = Unisquirter.player;
+
+            player.keys.right = true;
+            player.keys.left = false;
+            if (player.flipHoriz) {
+                Unisquirter.unflipHoriz(player);
+            }
+        }
+
+        /**
+         * Reacts to the space key being pressed. The player's space key is marked as down,
+         * and it's animated to jump up and forward.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyDownSpace(Unisquirter: Unisquirt): void {
+            if (Unisquirter.GamesRunner.getPaused()) {
+                return;
+            }
+
+            var player: IPlayer = Unisquirter.player;
+            if (!player.canJump || player.keys.jump) {
+                return;
+            }
+
+            player.canJump = false;
+            player.keys.jump = true;
+            Unisquirter.TimeHandler.addEvent(
+                (): void => {
+                    player.canJump = true;
+                },
+                21);
+
+            player.xvel += Unisquirter.unitsize * 3.5 * (player.flipHoriz ? -1 : 1);
+            player.yvel = -Unisquirter.unitsize * 3.5;
+
+            if (player.resting) {
+                player.xvel += Unisquirter.unitsize * 1.4 * (player.flipHoriz ? -1 : 1);
+                player.yvel -= Unisquirter.unitsize * 0.7;
+            }
+        }
+
+        /**
+         * Reacts to the left key being raised. The player's left key is marked as up.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyUpLeft(Unisquirter: Unisquirt): void {
+            Unisquirter.player.keys.left = false;
+        }
+        
+        /**
+         * Reacts to the left key being raised. The player's left key is marked as up.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyUpRight(Unisquirter: Unisquirt): void {
+            Unisquirter.player.keys.right = false;
+        }
+        
+        /**
+         * Reacts to the right key being raised. The player's right key is marked as up.
+         * 
+         * @param Unisquirter   The governing Unisquirt.
+         */
+        keyUpSpace(Unisquirter: Unisquirt, event?: Event): void {
+            Unisquirter.player.keys.jump = false;
+        }
+
+
         /* Upkeep maintenence
         */
 
         /**
          * Maintenance Function for any number of Thing groups. Each Thing with a
-         * movement Function has it called. Velocities are applied accounting for
-         * the approximate game frames per second.
+         * movement Function has it called. Velocities are applied.
          * 
-         * @param fps   The current estimated frames per second.
          * @param thingGroups   Any number of Thing groups.
          */
-        maintainMoving(fps: number, ...thingGroups: IThing[][]): void {
-            var fpsRatio: number = isNaN(fps) ? 1 : 60 / fps,
-                things: IThing[],
+        maintainMoving(...thingGroups: IThing[][]): void {
+            var things: IThing[],
                 thing: IThing,
                 i: number,
                 j: number;
@@ -214,9 +328,106 @@ module Unisquirt {
                         thing.movement(thing);
                     }
 
-                    thing.Unisquirter.shiftHoriz(thing, (thing.xvel || 0) * fpsRatio);
-                    thing.Unisquirter.shiftVert(thing, (thing.yvel || 0) * fpsRatio);
+                    this.shiftHoriz(thing, thing.xvel || 0);
+                    this.shiftVert(thing, thing.yvel || 0);
                 }
+            }
+        }
+
+        /**
+         * Maintenance Function for the player. Air friction and gravity are applied,
+         * as well as resting checks.
+         * 
+         * @param player   A Unisquirt's player.
+         */
+        maintainPlayer(player: IPlayer): void {
+            // Horizontal slowdown
+            if (Math.abs(player.xvel) > this.unitsize / 4) {
+                if (player.resting) {
+                    player.xvel *= 0.7;
+                } else {
+                    player.xvel *= 0.96;
+                }
+
+            } else {
+                player.xvel = 0;
+            }
+
+            // Key speed-ups, if on the ground
+            if (player.resting) {
+                if (player.keys.right) {
+                    player.xvel += player.Unisquirter.unitsize / 2;
+                } else if (player.keys.left) {
+                    player.xvel -= player.Unisquirter.unitsize / 2;
+                }
+            }
+
+            // Resting re-check
+            if (player.resting && !player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
+                player.resting = undefined;
+            }
+
+            // Vertical falling
+            if (!player.resting && player.yvel < this.unitsize * 3.5) {
+                player.yvel += this.unitsize / 7;
+            }
+
+            player.Unisquirter.ThingHitter.checkHitsOf[player.title](player);
+        }
+
+
+        /* Collision detection
+        */
+
+        /**
+         * Function generator for the generic canThingCollide checker. This is used
+         * repeatedly by ThingHittr to generate separately optimized Functions for
+         * different Thing types.
+         * 
+         * @returns A Function that determines if a Thing may have its hits checked.
+         */
+        generateCanThingCollide(): ThingHittr.IThingCheck {
+            /**
+             * Generic checker for whether a Thing may have its hits checked.
+             * 
+             * @param Thing   A Thing that might need to have hits checked.
+             * @returns Whether the Thing may have its hits checked.
+             */
+            return function canThingCollide(thing: IThing): boolean {
+                return thing.alive && !thing.nocollide;
+            }
+        }
+
+        /**
+         * Function generator for the generic isCharacterTouchingSolid checker. This
+         * is used repeately by the ThingHittr to generate separately optimized Functions
+         * for different Thing types.
+         * 
+         * @returns A Function that determines if a Character and Solid are hitting, which
+         *          is defined as the Character landing on the Solid.
+         */
+        generateIsCharacterTouchingSolid(): ThingHittr.IThingHitCheck {
+            /**
+             * Generic checker for whether a Character is landing on a Solid.
+             * 
+             * @param thing   A Character that may be landing on other.
+             * @param other   A Solid that thing may be landing on.
+             */
+            return function isCharacterTouchingSolid(thing: ICharacter, other: IThing): boolean {
+                return (
+                    thing.left <= other.right
+                    && thing.right >= other.left
+                    && other.top - thing.bottom < thing.Unisquirter.unitsize * 2);
+            }
+        }
+
+        /**
+         *
+         */
+        generateHitCharacterSolid(): ThingHittr.IThingHitFunction {
+            return function hitCharacterSolid(thing: ICharacter, other: IThing): void {
+                thing.resting = other;
+                thing.Unisquirter.setBottom(thing, other.top);
             }
         }
 
@@ -274,11 +485,11 @@ module Unisquirt {
             this.MapScreener.setVariables();
             this.QuadsKeeper.resetQuadrants();
 
-            this.GamesRunner.play();
-
             this.addPlayer();
             this.addFloor();
             this.addStars();
+
+            this.GamesRunner.play();
         }
 
         /**
@@ -288,7 +499,11 @@ module Unisquirt {
          * @returns The newly created Thing.
          */
         addPlayer(): IPlayer {
-            var player: IPlayer = this.player = <IPlayer>this.ObjectMaker.make("Player");
+            var player: IPlayer = this.player = <IPlayer>this.ObjectMaker.make("Player", {
+                "keys": {
+                    "direction": 0
+                }
+            });
 
             this.addThing(
                 player,

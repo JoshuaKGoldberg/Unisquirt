@@ -15,10 +15,12 @@ module Unisquirt {
             },
             function () {
                 this.maintainMoving(
-                    this.GamesRunner.getFPSAnalyzer().getAverage(),
                     this.GroupHolder.getSolidGroup(),
                     this.GroupHolder.getCharacterGroup(),
                     this.GroupHolder.getSceneryGroup());
+            },
+            function () {
+                this.maintainPlayer(this.player);
             },
             function () {
                 this.TimeHandler.handleEvents();

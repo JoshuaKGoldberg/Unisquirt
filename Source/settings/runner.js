@@ -13,7 +13,10 @@ var Unisquirt;
                 this.QuadsKeeper.determineAllQuadrants("Solid", this.GroupHolder.getSolidGroup());
             },
             function () {
-                this.maintainMoving(this.GamesRunner.getFPSAnalyzer().getAverage(), this.GroupHolder.getSolidGroup(), this.GroupHolder.getCharacterGroup(), this.GroupHolder.getSceneryGroup());
+                this.maintainMoving(this.GroupHolder.getSolidGroup(), this.GroupHolder.getCharacterGroup(), this.GroupHolder.getSceneryGroup());
+            },
+            function () {
+                this.maintainPlayer(this.player);
             },
             function () {
                 this.TimeHandler.handleEvents();

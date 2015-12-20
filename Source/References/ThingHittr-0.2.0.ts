@@ -2,12 +2,12 @@
 
 declare module ThingHittr {
     /**
-     * Determines whether a group of Things may all have hits checked.
+     * Determines whether a Thing may all have hits checked.
      * 
-     * @returns Whether the Things may all have hits checked.
+     * @returns Whether the Thing may all have hits checked.
      */
-    export interface IThingGroupCheck {
-        (): boolean;
+    export interface IThingCheck {
+        (thing: QuadsKeepr.IThing): boolean;
     }
 
     /**
@@ -43,12 +43,12 @@ declare module ThingHittr {
     }
 
     /**
-     * Generator Function to create IThingGroupCheck Functions.
+     * Generator Function to create IThingCheck Functions.
      * 
-     * @returns A Function that may be used as a group checker.
+     * @returns A Function that may be used as a Thing checker.
      */
-    export interface IThingGroupCheckGenerator {
-        (): IThingGroupCheck;
+    export interface IThingCheckGenerator {
+        (): IThingCheck;
     }
 
     /**
@@ -79,10 +79,10 @@ declare module ThingHittr {
     }
 
     /**
-     * Container to hold IThingGroupCheck Functions, keyed by their respective group.
+     * Container to hold IThingCheck Functions, keyed by their respective type.
      */
-    export interface IThingGroupCheckContainer {
-        [i: string]: IThingGroupCheck;
+    export interface IThingCheckContainer {
+        [i: string]: IThingCheck;
     }
 
     /**
@@ -128,11 +128,11 @@ declare module ThingHittr {
     }
 
     /**
-     * Container to hold IThingGroupCheckGenerator Functions, keyed by their
+     * Container to hold IThingCheckGenerator Functions, keyed by their
      * respective groups.
      */
-    export interface IThingGroupCheckGeneratorContainer {
-        [i: string]: IThingGroupCheckGenerator;
+    export interface IThingCheckGeneratorContainer {
+        [i: string]: IThingCheckGenerator;
     }
 
     /**
@@ -182,7 +182,7 @@ declare module ThingHittr {
          * The Function generators used for each group to test if a contained
          * Thing may collide, keyed by group name.
          */
-        globalCheckGenerators: IThingGroupCheckGeneratorContainer;
+        globalCheckGenerators: IThingCheckGeneratorContainer;
 
         /**
          * The Function generators used for hitChecks, as an Object with sub-Objects
@@ -299,7 +299,7 @@ module ThingHittr {
          * Check Functions for Things within groups to see if they're able to
          * collide in the first place.
          */
-        private globalChecks: IThingGroupCheckContainer;
+        private globalChecks: IThingCheckContainer;
 
         /**
          * Collision detection Functions to check two Things for collision.
@@ -314,7 +314,7 @@ module ThingHittr {
         /**
          * Function generators for globalChecks.
          */
-        private globalCheckGenerators: IThingGroupCheckGeneratorContainer;
+        private globalCheckGenerators: IThingCheckGeneratorContainer;
 
         /**
          * Function generators for hitChecks.
