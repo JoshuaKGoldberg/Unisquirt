@@ -767,10 +767,10 @@ module Unisquirt {
                 this.ObjectMaker.make(
                     "Floor",
                     {
-                        "width": this.MapScreener.width
+                        "width": this.MapScreener.width * 1.1
                     }),
-                0,
-                this.MapScreener.height - (16) * this.unitsize);
+                this.MapScreener.width * -.1,
+                this.MapScreener.height - 16 * this.unitsize);
         }
 
         /**

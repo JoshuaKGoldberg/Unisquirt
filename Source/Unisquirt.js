@@ -588,8 +588,8 @@ var Unisquirt;
          */
         Unisquirt.prototype.addFloor = function () {
             this.addThing(this.ObjectMaker.make("Floor", {
-                "width": this.MapScreener.width
-            }), 0, this.MapScreener.height - (16) * this.unitsize);
+                "width": this.MapScreener.width * 1.1
+            }), this.MapScreener.width * -.1, this.MapScreener.height - 16 * this.unitsize);
         };
         /**
          * Adds Star Things scattered across the sky randomly.
