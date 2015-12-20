@@ -83,8 +83,7 @@ var Unisquirt;
                 Unisquirter.GroupHolder.getGroup("Scenery"),
                 Unisquirter.GroupHolder.getGroup("Solid"),
                 Unisquirter.GroupHolder.getGroup("Character"),
-                Unisquirter.GroupHolder.getGroup("Text"),
-                Unisquirter.GroupHolder.getGroup("Particle")
+                Unisquirter.GroupHolder.getGroup("Text")
             ]);
         };
         /* Global manipulations
@@ -178,7 +177,7 @@ var Unisquirt;
                 player.xvel += Unisquirter.unitsize * 1.4 * (player.flipHoriz ? -1 : 1);
                 player.yvel -= Unisquirter.unitsize * 0.7;
             }
-            Unisquirter.addCloudBehindPlayer(player);
+            Unisquirter.addCloudsBehindPlayer(player);
         };
         /**
          * Reacts to the left key being raised. The player's left key is marked as up.
@@ -284,6 +283,8 @@ var Unisquirt;
             }
             // Map sides overflow
             this.checkPlayerSidesOverflow(player);
+            // Rainbow spawning
+            this.addRainbowBehindPlayer(player);
         };
         /**
          *
@@ -417,6 +418,11 @@ var Unisquirt;
                 else if (other.player) {
                     thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                 }
+                else {
+                    return;
+                }
+                console.log("got", thing.title, thing.opacity, thing.nocollide, other.title, other.opacity, other.nocollide);
+                debugger;
             };
         };
         /* Spawning
@@ -438,16 +444,23 @@ var Unisquirt;
          * @param thing   The Cloud being spawned.
          */
         Unisquirt.prototype.spawnCloud = function (thing) {
-            var yvel = -thing.Unisquirter.unitsize / 7;
+            var yvel = -thing.Unisquirter.unitsize / 7, isFading = false;
             thing.nocollide = true;
             thing.opacity = thing.Unisquirter.NumberMaker.randomWithin(.7, .98);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 thing.nocollide = false;
+                isFading = true;
             }, 35);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
-                if (thing.opacity <= .07) {
-                    thing.Unisquirter.killNormal(thing);
-                    return true;
+                if (isFading) {
+                    thing.opacity -= .035;
+                    if (thing.opacity < .14) {
+                        thing.nocollide = true;
+                    }
+                    if (thing.opacity <= .07) {
+                        thing.Unisquirter.killNormal(thing);
+                        return true;
+                    }
                 }
                 if (thing.xvel) {
                     thing.xvel *= .91;
@@ -455,10 +468,20 @@ var Unisquirt;
                         thing.xvel = 0;
                     }
                 }
-                thing.opacity -= .0014;
                 thing.Unisquirter.shiftVert(thing, yvel);
                 yvel *= .99;
                 return false;
+            }, 1, Infinity);
+        };
+        /**
+         *
+         */
+        Unisquirt.prototype.spawnRainbow = function (thing) {
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                thing.opacity -= .1;
+                if (thing.opacity <= 0) {
+                    thing.Unisquirter.killNormal(thing);
+                }
             }, 1, Infinity);
         };
         /**
@@ -488,15 +511,48 @@ var Unisquirt;
         /* Actions
         */
         /**
+         * Adds a random number of Clouds just behind a Player.
+         *
+         * @param player   A Player emitting Clouds.
+         */
+        Unisquirt.prototype.addCloudsBehindPlayer = function (player) {
+            for (var i = this.NumberMaker.randomIntWithin(7, 14); i > 0; i -= 1) {
+                this.addCloudBehindPlayer(player);
+            }
+        };
+        /**
          * Adds a Cloud just behind a Player, based on where the Player is facing.
          *
          * @param player   A Player emitting a Cloud.
          * @returns The newly created Cloud.
          */
         Unisquirt.prototype.addCloudBehindPlayer = function (player) {
-            var referenceThing = player, cloud = this.ObjectMaker.make("Cloud", {
+            var cloud = this.ObjectMaker.make("Cloud", {
                 "xvel": player.xvel * -.35
             });
+            this.addThingBehindPlayerGeneral(player, cloud);
+            this.shiftHoriz(cloud, this.NumberMaker.randomWithin(-this.unitsize * 3, this.unitsize * 3));
+            this.shiftVert(cloud, this.NumberMaker.randomWithin(-this.unitsize, this.unitsize));
+            cloud.xvel += this.NumberMaker.randomWithin(-this.unitsize / 7, this.unitsize / 7);
+            cloud.yvel += this.NumberMaker.randomWithin(-this.unitsize / 14, this.unitsize / 14);
+            cloud.yvel += player.yvel / 10;
+            return cloud;
+        };
+        /**
+         *
+         */
+        Unisquirt.prototype.addRainbowBehindPlayer = function (player) {
+            var position = this.getPlayerBehindPosition(player, this.ObjectMaker.make("Rainbow")), direction = player.flipHoriz ? 1 : -1, dx = Math.max(Math.abs(player.xvel), 1), i;
+            for (i = 0; i < dx; i += 1) {
+                this.addThing("Rainbow", position[0] + i * direction, position[1]);
+            }
+        };
+        Unisquirt.prototype.addThingBehindPlayerGeneral = function (player, thing) {
+            var position = this.getPlayerBehindPosition(player, thing);
+            return this.addThing(thing, position[0] - thing.width * this.unitsize / 2, position[1]);
+        };
+        Unisquirt.prototype.getPlayerBehindPosition = function (player, thing) {
+            var referenceThing = player, left, top;
             // If the Player has a shadow and the shadow's rear is visible,
             // that becomes the position reference
             if (player.shadow) {
@@ -511,15 +567,16 @@ var Unisquirt;
                     }
                 }
             }
-            console.log("is", referenceThing === player.shadow);
             if (player.flipHoriz) {
-                this.addThing(cloud, referenceThing.right - cloud.width * this.unitsize / 2, referenceThing.top + referenceThing.height * this.unitsize / 2);
+                left = referenceThing.right - this.unitsize / 2;
+                left -= (thing.width + 2) * this.unitsize / 2;
             }
             else {
-                this.addThing(cloud, referenceThing.left - cloud.width * this.unitsize / 2, referenceThing.top + referenceThing.height * this.unitsize / 2);
+                left = referenceThing.left + this.unitsize / 2;
+                left += thing.width * this.unitsize / 2;
             }
-            cloud.yvel += player.yvel / 10;
-            return cloud;
+            top = referenceThing.top + 13 * this.unitsize;
+            return [left, top];
         };
         /* Deaths
         */

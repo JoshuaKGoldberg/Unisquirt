@@ -9,4 +9,5 @@ html, body {
 
 body {
     background: black;
+    overflow: hidden;
 }

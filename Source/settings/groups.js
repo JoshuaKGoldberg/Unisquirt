@@ -3,7 +3,7 @@ var Unisquirt;
 (function (Unisquirt) {
     "use strict";
     Unisquirt.Unisquirt.settings.groups = {
-        "groupNames": ["Particle", "Text", "Character", "Solid", "Scenery"],
+        "groupNames": ["Text", "Character", "Solid", "Scenery"],
         "groupTypes": "Array"
     };
 })(Unisquirt || (Unisquirt = {}));

@@ -5,7 +5,7 @@ var Unisquirt;
     Unisquirt.Unisquirt.settings.maps = {
         "mapDefault": "Night",
         "locationDefault": "Sky",
-        "groupTypes": ["Particle", "Text", "Character", "Solid", "Scenery"],
+        "groupTypes": ["Text", "Character", "Solid", "Scenery"],
         "screenVariables": {},
         "onSpawn": Unisquirt.Unisquirt.prototype.addPreThing,
         "macros": {},

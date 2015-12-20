@@ -6,7 +6,7 @@ module Unisquirt {
     Unisquirt.settings.quadrants = {
         "numRows": 8,
         "numCols": 8,
-        "groupNames": ["Particle", "Character", "Text", "Solid", "Scenery"],
+        "groupNames": ["Character", "Text", "Solid", "Scenery"],
         "keyGroupName": "groupType"
     };
 }

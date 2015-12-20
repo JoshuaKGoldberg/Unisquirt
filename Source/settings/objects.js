@@ -17,8 +17,8 @@ var Unisquirt;
                         "PlayerShadow": {}
                     }
                 },
-                "Particle": {},
                 "Scenery": {
+                    "Rainbow": {},
                     "Star": {}
                 },
                 "Solid": {
@@ -46,12 +46,12 @@ var Unisquirt;
                 "groupType": "Character"
             },
             "Cloud": {
-                "width": 21,
-                "height": 21,
+                "width": 7,
+                "height": 7,
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnCloud
             },
             "Player": {
-                "width": 39,
+                "width": 36,
                 "height": 31,
                 "canJump": true,
                 "player": true
@@ -59,16 +59,19 @@ var Unisquirt;
             "PlayerShadow": {
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnPlayerShadow
             },
-            "Particle": {
-                "groupType": "Particle"
-            },
             "Scenery": {
                 "groupType": "Scenery"
+            },
+            "Rainbow": {
+                "width": 1,
+                "height": 14,
+                "scale": 0.5,
+                "onThingAdded": Unisquirt.Unisquirt.prototype.spawnRainbow
             },
             "Star": {
                 "width": 8,
                 "height": 8,
-                "scale": .5,
+                "scale": 0.5,
                 "opacity": .7,
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnStar,
                 "movement": Unisquirt.Unisquirt.prototype.moveStar

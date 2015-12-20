@@ -4,7 +4,7 @@ module Unisquirt {
     "use strict";
 
     Unisquirt.settings.groups = {
-        "groupNames": ["Particle", "Text", "Character", "Solid", "Scenery"],
+        "groupNames": ["Text", "Character", "Solid", "Scenery"],
         "groupTypes": "Array"
     };
 }

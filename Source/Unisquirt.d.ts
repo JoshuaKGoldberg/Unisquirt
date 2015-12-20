@@ -90,5 +90,7 @@ declare module Unisquirt {
          *                            previous position (by default, false).
          */
         killPlayerShadow(thing: IPlayer, replaceWithPlayer?: boolean): void;
+
+        getPlayerBehindPosition(player: IPlayer, thing: IThing): [number, number];
     }
 }

@@ -18,8 +18,8 @@ module Unisquirt {
                         "PlayerShadow": {}
                     }
                 },
-                "Particle": {},
                 "Scenery": {
+                    "Rainbow": {},
                     "Star": {}
                 },
                 "Solid": {
@@ -47,12 +47,12 @@ module Unisquirt {
                 "groupType": "Character"
             },
             "Cloud": {
-                "width": 21,
-                "height": 21,
+                "width": 7,
+                "height": 7,
                 "onThingAdded": Unisquirt.prototype.spawnCloud
             },
             "Player": {
-                "width": 39,
+                "width": 36,
                 "height": 31,
                 "canJump": true,
                 "player": true
@@ -60,16 +60,19 @@ module Unisquirt {
             "PlayerShadow": {
                 "onThingAdded": Unisquirt.prototype.spawnPlayerShadow
             },
-            "Particle": {
-                "groupType": "Particle"
-            },
             "Scenery": {
                 "groupType": "Scenery"
+            },
+            "Rainbow": {
+                "width": 1,
+                "height": 14,
+                "scale": 0.5,
+                "onThingAdded": Unisquirt.prototype.spawnRainbow
             },
             "Star": {
                 "width": 8,
                 "height": 8,
-                "scale": .5,
+                "scale": 0.5,
                 "opacity": .7,
                 "onThingAdded": Unisquirt.prototype.spawnStar,
                 "movement": Unisquirt.prototype.moveStar
