@@ -259,10 +259,10 @@ var Unisquirt;
             // Key speed-ups, if on the ground
             if (player.resting) {
                 if (player.keys.right) {
-                    player.xvel += player.Unisquirter.unitsize / 2;
+                    player.xvel += player.Unisquirter.unitsize / 1.17;
                 }
                 else if (player.keys.left) {
-                    player.xvel -= player.Unisquirter.unitsize / 2;
+                    player.xvel -= player.Unisquirter.unitsize / 1.17;
                 }
             }
             // Resting re-check
@@ -404,18 +404,18 @@ var Unisquirt;
          */
         Unisquirt.prototype.generateHitCharacterCharacter = function () {
             /**
-             * A callback for when a Character hits a Character. If one is a Player, it's
-             * killed.
+             * A callback for when a Character hits a Character. If one is a Player (either
+             * the primary one or its shadow), the primary Player is killed.
              *
              * @param thing   A Character hitting other.
-             * @param other   A solid being hit by thing.
+             * @param other   A Solid being hit by thing.
              */
             return function hitCharacterCharacter(thing, other) {
                 if (thing.player) {
-                    thing.Unisquirter.killPlayer(thing);
+                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                 }
                 else if (other.player) {
-                    thing.Unisquirter.killPlayer(other);
+                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                 }
             };
         };
