@@ -282,6 +282,35 @@ var Unisquirt;
                     player.yvel *= .84;
                 }
             }
+            // Map sides overflow
+            this.checkPlayerSidesOverflow(player);
+        };
+        /**
+         *
+         */
+        Unisquirt.prototype.checkPlayerSidesOverflow = function (player) {
+            if (player.left > this.MapScreener.left && player.right < this.MapScreener.right) {
+                if (player.shadow) {
+                    this.killPlayerShadow(player.shadow);
+                }
+                return;
+            }
+            if (!player.shadow) {
+                player.shadow = this.addThing("PlayerShadow");
+            }
+            this.setTop(player.shadow, player.top);
+            if (player.right > this.MapScreener.right) {
+                this.setRight(player.shadow, player.right - this.MapScreener.right);
+                if (player.left > this.MapScreener.right) {
+                    this.killPlayerShadow(player.shadow, true);
+                }
+            }
+            else {
+                this.setLeft(player.shadow, this.MapScreener.right - (this.MapScreener.left - player.left));
+                if (player.right < this.MapScreener.left) {
+                    this.killPlayerShadow(player.shadow, true);
+                }
+            }
         };
         /* Collision detection
         */
@@ -432,6 +461,18 @@ var Unisquirt;
                 return false;
             }, 1, Infinity);
         };
+        /**
+         *
+         */
+        Unisquirt.prototype.spawnPlayerShadow = function (thing) {
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                if (!thing.alive) {
+                    return true;
+                }
+                thing.Unisquirter.setClass(thing, thing.Unisquirter.player.className);
+                return false;
+            }, 1, Infinity);
+        };
         /* Movement
         */
         /**
@@ -453,14 +494,29 @@ var Unisquirt;
          * @returns The newly created Cloud.
          */
         Unisquirt.prototype.addCloudBehindPlayer = function (player) {
-            var cloud = this.ObjectMaker.make("Cloud", {
+            var referenceThing = player, cloud = this.ObjectMaker.make("Cloud", {
                 "xvel": player.xvel * -.35
             });
+            // If the Player has a shadow and the shadow's rear is visible,
+            // that becomes the position reference
+            if (player.shadow) {
+                if (player.flipHoriz) {
+                    if (player.right > this.MapScreener.right) {
+                        referenceThing = player.shadow;
+                    }
+                }
+                else {
+                    if (player.left < this.MapScreener.left) {
+                        referenceThing = player.shadow;
+                    }
+                }
+            }
+            console.log("is", referenceThing === player.shadow);
             if (player.flipHoriz) {
-                this.addThing(cloud, player.right - cloud.width * this.unitsize / 2, player.top + player.height * this.unitsize / 2);
+                this.addThing(cloud, referenceThing.right - cloud.width * this.unitsize / 2, referenceThing.top + referenceThing.height * this.unitsize / 2);
             }
             else {
-                this.addThing(cloud, player.left - cloud.width * this.unitsize / 2, player.top + player.height * this.unitsize / 2);
+                this.addThing(cloud, referenceThing.left - cloud.width * this.unitsize / 2, referenceThing.top + referenceThing.height * this.unitsize / 2);
             }
             cloud.yvel += player.yvel / 10;
             return cloud;
@@ -476,6 +532,21 @@ var Unisquirt;
             player.alive = false;
             player.xvel = 0;
             player.yvel = 0;
+        };
+        /**
+         * Kills a Player's shadow and unlists it from its Player.
+         *
+         * @param player   The PlayerShadow being killed.
+         * @param replaceWithPlayer   Whether the Player should be moved to the shadow's
+         *                            previous position (by default, false).
+         */
+        Unisquirt.prototype.killPlayerShadow = function (thing, replaceWithPlayer) {
+            this.killNormal(thing);
+            thing.Unisquirter.player.shadow = undefined;
+            if (replaceWithPlayer) {
+                this.setLeft(thing.Unisquirter.player, thing.left);
+                this.setTop(thing.Unisquirter.player, thing.top);
+            }
         };
         /* Map sets
         */

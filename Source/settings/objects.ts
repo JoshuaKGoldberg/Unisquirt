@@ -14,7 +14,9 @@ module Unisquirt {
             "Thing": {
                 "Character": {
                     "Cloud": {},
-                    "Player": {}
+                    "Player": {
+                        "PlayerShadow": {}
+                    }
                 },
                 "Particle": {},
                 "Scenery": {
@@ -54,6 +56,9 @@ module Unisquirt {
                 "height": 31,
                 "canJump": true,
                 "player": true
+            },
+            "PlayerShadow": {
+                "onThingAdded": Unisquirt.prototype.spawnPlayerShadow
             },
             "Particle": {
                 "groupType": "Particle"

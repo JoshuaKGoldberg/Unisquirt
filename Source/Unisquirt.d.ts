@@ -25,7 +25,6 @@ declare module Unisquirt {
      * A Player Thing, which is normally controlled by the user.
      */
     export interface IPlayer extends ICharacter {
-
         /**
          * Whether jump can be pressed (as opposed to it having just been).
          */
@@ -34,7 +33,12 @@ declare module Unisquirt {
         /**
          * The current state of user-provided input.
          */
-        keys: IPlayerKeys;
+        keys?: IPlayerKeys;
+
+        /**
+         * A 
+         */
+        shadow?: IPlayer;
     }
 
     /**
@@ -77,5 +81,14 @@ declare module Unisquirt {
          * @param player   The Player being killed.
          */
         killPlayer(player: IPlayer): void;
+        
+        /**
+         * Kills a Player's shadow and unlists it from its Player.
+         * 
+         * @param player   The PlayerShadow being killed.
+         * @param replaceWithPlayer   Whether the Player should be moved to the shadow's
+         *                            previous position (by default, false).
+         */
+        killPlayerShadow(thing: IPlayer, replaceWithPlayer?: boolean): void;
     }
 }

@@ -355,7 +355,6 @@ module Unisquirt {
                 } else {
                     player.xvel *= 0.96;
                 }
-
             } else {
                 player.xvel = 0;
             }
@@ -385,6 +384,40 @@ module Unisquirt {
                     player.yvel = 0;
                 } else if (player.top < player.Unisquirter.MapScreener.top) {
                     player.yvel *= .84;
+                }
+            }
+
+            // Map sides overflow
+            this.checkPlayerSidesOverflow(player);
+        }
+
+        /**
+         * 
+         */
+        checkPlayerSidesOverflow(player: IPlayer): void {
+            if (player.left > this.MapScreener.left && player.right < this.MapScreener.right) {
+                if (player.shadow) {
+                    this.killPlayerShadow(player.shadow);
+                }
+
+                return;
+            }
+
+            if (!player.shadow) {
+                player.shadow = <IPlayer>this.addThing("PlayerShadow");
+            }
+
+            this.setTop(player.shadow, player.top);
+
+            if (player.right > this.MapScreener.right) {
+                this.setRight(player.shadow, player.right - this.MapScreener.right);
+                if (player.left > this.MapScreener.right) {
+                    this.killPlayerShadow(player.shadow, true);
+                }
+            } else {
+                this.setLeft(player.shadow, this.MapScreener.right - (this.MapScreener.left - player.left));
+                if (player.right < this.MapScreener.left) {
+                    this.killPlayerShadow(player.shadow, true);
                 }
             }
         }
@@ -565,6 +598,23 @@ module Unisquirt {
                 Infinity);
         }
 
+        /**
+         *
+         */
+        spawnPlayerShadow(thing: IPlayer): void {
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): boolean => {
+                    if (!thing.alive) {
+                        return true;
+                    }
+
+                    thing.Unisquirter.setClass(thing, thing.Unisquirter.player.className);
+                    return false;
+                },
+                1,
+                Infinity);
+        }
+
 
         /* Movement
         */
@@ -591,20 +641,37 @@ module Unisquirt {
          * @returns The newly created Cloud.
          */
         addCloudBehindPlayer(player: IPlayer): IThing {
-            var cloud: IThing = this.ObjectMaker.make("Cloud", {
-                "xvel": player.xvel * -.35
-            });
+            var referenceThing: IThing = player,
+                cloud: IThing = this.ObjectMaker.make("Cloud", {
+                    "xvel": player.xvel * -.35
+                });
+
+            // If the Player has a shadow and the shadow's rear is visible,
+            // that becomes the position reference
+            if (player.shadow) {
+                if (player.flipHoriz) {
+                    if (player.right > this.MapScreener.right) {
+                        referenceThing = player.shadow;
+                    }
+                } else {
+                    if (player.left < this.MapScreener.left) {
+                        referenceThing = player.shadow;
+                    }
+                }
+            }
+
+            console.log("is", referenceThing === player.shadow);
 
             if (player.flipHoriz) {
                 this.addThing(
                     cloud,
-                    player.right - cloud.width * this.unitsize / 2,
-                    player.top + player.height * this.unitsize / 2);
+                    referenceThing.right - cloud.width * this.unitsize / 2,
+                    referenceThing.top + referenceThing.height * this.unitsize / 2);
             } else {
                 this.addThing(
                     cloud,
-                    player.left - cloud.width * this.unitsize / 2,
-                    player.top + player.height * this.unitsize / 2);
+                    referenceThing.left - cloud.width * this.unitsize / 2,
+                    referenceThing.top + referenceThing.height * this.unitsize / 2);
             }
 
             cloud.yvel += player.yvel / 10;
@@ -625,6 +692,23 @@ module Unisquirt {
             player.alive = false;
             player.xvel = 0;
             player.yvel = 0;
+        }
+        
+        /**
+         * Kills a Player's shadow and unlists it from its Player.
+         * 
+         * @param player   The PlayerShadow being killed.
+         * @param replaceWithPlayer   Whether the Player should be moved to the shadow's
+         *                            previous position (by default, false).
+         */
+        killPlayerShadow(thing: IPlayer, replaceWithPlayer?: boolean): void {
+            this.killNormal(thing);
+            thing.Unisquirter.player.shadow = undefined;
+
+            if (replaceWithPlayer) {
+                this.setLeft(thing.Unisquirter.player, thing.left);
+                this.setTop(thing.Unisquirter.player, thing.top);
+            }
         }
 
 
