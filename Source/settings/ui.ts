@@ -24,8 +24,8 @@ module Unisquirt {
         },
         "sizes": {
             "Full Screen": {
-                "width": window.innerWidth,
-                "height": window.innerHeight
+                "width": Math.min(280 * Unisquirt.unitsize, window.innerWidth),
+                "height": Math.min(350 * Unisquirt.unitsize, window.innerHeight)
             }
         },
         "sizeDefault": "Full Screen",

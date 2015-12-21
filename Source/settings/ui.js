@@ -23,8 +23,8 @@ var Unisquirt;
         },
         "sizes": {
             "Full Screen": {
-                "width": window.innerWidth,
-                "height": window.innerHeight
+                "width": Math.min(280 * Unisquirt.Unisquirt.unitsize, window.innerWidth),
+                "height": Math.min(350 * Unisquirt.Unisquirt.unitsize, window.innerHeight)
             }
         },
         "sizeDefault": "Full Screen",
