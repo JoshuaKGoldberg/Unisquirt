@@ -310,6 +310,9 @@ var Unisquirt;
             }
             // Collisions
             this.ThingHitter.checkHitsOf[player.title](player);
+            if (player.shadow) {
+                this.ThingHitter.checkHitsOf[player.title](player.shadow);
+            }
         };
         /**
          *
