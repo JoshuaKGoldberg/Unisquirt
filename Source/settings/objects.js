@@ -11,8 +11,10 @@ var Unisquirt;
             "Map": {},
             "Quadrant": {},
             "Thing": {
+                "Particle": {
+                    "Cloud": {}
+                },
                 "Character": {
-                    "Cloud": {},
                     "Player": {
                         "PlayerShadow": {}
                     }
@@ -23,8 +25,7 @@ var Unisquirt;
                 },
                 "Solid": {
                     "Floor": {}
-                },
-                "Text": {}
+                }
             }
         },
         "properties": {
@@ -42,13 +43,16 @@ var Unisquirt;
                 "yvel": 0,
                 "onMake": Unisquirt.Unisquirt.prototype.thingProcess
             },
-            "Character": {
-                "groupType": "Character"
+            "Particle": {
+                "groupType": "Particle"
             },
             "Cloud": {
                 "width": 7,
                 "height": 7,
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnCloud
+            },
+            "Character": {
+                "groupType": "Character"
             },
             "Player": {
                 "width": 44,
@@ -84,9 +88,6 @@ var Unisquirt;
             },
             "Floor": {
                 "height": 16
-            },
-            "Text": {
-                "groupType": "Text"
             }
         }
     };

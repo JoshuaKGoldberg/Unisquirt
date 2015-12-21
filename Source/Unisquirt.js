@@ -67,8 +67,9 @@ var Unisquirt;
          */
         Unisquirt.prototype.resetThingHitter = function (Unisquirter, settings) {
             _super.prototype.resetThingHitter.call(this, Unisquirter, settings);
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
             Unisquirter.ThingHitter.cacheHitCheckGroup("Character");
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Particle");
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
         };
         /**
          * Sets this.container via the parent GameStartr resetContainer, then tells
@@ -82,8 +83,8 @@ var Unisquirt;
             Unisquirter.PixelDrawer.setThingArrays([
                 Unisquirter.GroupHolder.getGroup("Scenery"),
                 Unisquirter.GroupHolder.getGroup("Solid"),
-                Unisquirter.GroupHolder.getGroup("Character"),
-                Unisquirter.GroupHolder.getGroup("Text")
+                Unisquirter.GroupHolder.getGroup("Particle"),
+                Unisquirter.GroupHolder.getGroup("Character")
             ]);
             Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
             Unisquirter.container.appendChild(Unisquirter.createElement("div", {
@@ -244,7 +245,6 @@ var Unisquirt;
                     }
                     this.shiftHoriz(thing, thing.xvel || 0);
                     this.shiftVert(thing, thing.yvel || 0);
-                    this.ThingHitter.checkHitsOf[thing.title](thing);
                 }
             }
         };
@@ -308,6 +308,8 @@ var Unisquirt;
             if (player.xvel !== 0 && player.yvel !== 0) {
                 this.addRainbowBehindPlayer(player);
             }
+            // Collisions
+            this.ThingHitter.checkHitsOf[player.title](player);
         };
         /**
          *
@@ -385,7 +387,7 @@ var Unisquirt;
          *
          * @returns A Function that determines if a Character and Character are hitting.
          */
-        Unisquirt.prototype.generateIsCharacterTouchingCharacter = function () {
+        Unisquirt.prototype.generateIsCharacterTouchingParticle = function () {
             /**
              * Generic checker for whether a Character is hitting a Solid.
              *
@@ -426,7 +428,7 @@ var Unisquirt;
          *
          * @returns A Function for when a Character hits a Character.
          */
-        Unisquirt.prototype.generateHitCharacterCharacter = function () {
+        Unisquirt.prototype.generateHitCharacterParticle = function () {
             /**
              * A callback for when a Character hits a Character. If one is a Player (either
              * the primary one or its shadow), the primary Player is killed.
@@ -658,6 +660,7 @@ var Unisquirt;
             var _this = this;
             var dy = -2.8;
             player.alive = false;
+            player.nocollide = true;
             player.xvel = 0;
             player.yvel = 0;
             this.TimeHandler.cancelClassCycle(player, "running");

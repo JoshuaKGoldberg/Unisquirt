@@ -10,11 +10,13 @@ module Unisquirt {
                 this.DeviceLayer.activateAllGamepadTriggers();
             },
             function (): void {
+                this.QuadsKeeper.determineAllQuadrants("Particle", this.GroupHolder.getParticleGroup());
                 this.QuadsKeeper.determineAllQuadrants("Character", this.GroupHolder.getCharacterGroup());
                 this.QuadsKeeper.determineAllQuadrants("Solid", this.GroupHolder.getSolidGroup());
             },
             function (): void {
                 this.maintainMoving(
+                    this.GroupHolder.getParticleGroup(),
                     this.GroupHolder.getCharacterGroup(),
                     this.GroupHolder.getSceneryGroup());
             },

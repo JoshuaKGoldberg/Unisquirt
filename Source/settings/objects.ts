@@ -12,8 +12,10 @@ module Unisquirt {
             "Map": {},
             "Quadrant": {},
             "Thing": {
+                "Particle": {
+                    "Cloud": {}
+                },
                 "Character": {
-                    "Cloud": {},
                     "Player": {
                         "PlayerShadow": {}
                     }
@@ -24,8 +26,7 @@ module Unisquirt {
                 },
                 "Solid": {
                     "Floor": {}
-                },
-                "Text": {}
+                }
             }
         },
         "properties": {
@@ -43,13 +44,16 @@ module Unisquirt {
                 "yvel": 0,
                 "onMake": Unisquirt.prototype.thingProcess
             },
-            "Character": {
-                "groupType": "Character"
+            "Particle": {
+                "groupType": "Particle"
             },
             "Cloud": {
                 "width": 7,
                 "height": 7,
                 "onThingAdded": Unisquirt.prototype.spawnCloud
+            },
+            "Character": {
+                "groupType": "Character"
             },
             "Player": {
                 "width": 44,
@@ -85,9 +89,6 @@ module Unisquirt {
             },
             "Floor": {
                 "height": 16
-            },
-            "Text": {
-                "groupType": "Text"
             }
         }
     };

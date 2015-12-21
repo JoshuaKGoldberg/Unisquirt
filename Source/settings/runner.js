@@ -9,11 +9,12 @@ var Unisquirt;
                 this.DeviceLayer.activateAllGamepadTriggers();
             },
             function () {
+                this.QuadsKeeper.determineAllQuadrants("Particle", this.GroupHolder.getParticleGroup());
                 this.QuadsKeeper.determineAllQuadrants("Character", this.GroupHolder.getCharacterGroup());
                 this.QuadsKeeper.determineAllQuadrants("Solid", this.GroupHolder.getSolidGroup());
             },
             function () {
-                this.maintainMoving(this.GroupHolder.getCharacterGroup(), this.GroupHolder.getSceneryGroup());
+                this.maintainMoving(this.GroupHolder.getParticleGroup(), this.GroupHolder.getCharacterGroup(), this.GroupHolder.getSceneryGroup());
             },
             function () {
                 this.maintainPlayer(this.player);

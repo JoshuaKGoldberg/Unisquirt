@@ -4,6 +4,6 @@ module Unisquirt {
     "use strict";
 
     Unisquirt.settings.renderer = {
-        "groupNames": ["Character", "Text", "Solid", "Scenery"]
+        "groupNames": ["Particle", "Character", "Solid", "Scenery"]
     };
 }

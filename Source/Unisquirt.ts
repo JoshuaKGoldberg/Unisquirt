@@ -133,8 +133,9 @@ module Unisquirt {
         resetThingHitter(Unisquirter: Unisquirt, settings: GameStartr.IGameStartrSettings): void {
             super.resetThingHitter(Unisquirter, settings);
 
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
             Unisquirter.ThingHitter.cacheHitCheckGroup("Character");
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Particle");
+            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
         }
 
         /**
@@ -150,8 +151,8 @@ module Unisquirt {
             Unisquirter.PixelDrawer.setThingArrays([
                 <IThing[]>Unisquirter.GroupHolder.getGroup("Scenery"),
                 <IThing[]>Unisquirter.GroupHolder.getGroup("Solid"),
-                <IThing[]>Unisquirter.GroupHolder.getGroup("Character"),
-                <IThing[]>Unisquirter.GroupHolder.getGroup("Text")
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Particle"),
+                <IThing[]>Unisquirter.GroupHolder.getGroup("Character")
             ]);
 
             Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
@@ -351,7 +352,6 @@ module Unisquirt {
 
                     this.shiftHoriz(thing, thing.xvel || 0);
                     this.shiftVert(thing, thing.yvel || 0);
-                    this.ThingHitter.checkHitsOf[thing.title](thing);
                 }
             }
         }
@@ -418,6 +418,9 @@ module Unisquirt {
             if (player.xvel !== 0 && player.yvel !== 0) {
                 this.addRainbowBehindPlayer(player);
             }
+
+            // Collisions
+            this.ThingHitter.checkHitsOf[player.title](player);
         }
 
         /**
@@ -505,7 +508,7 @@ module Unisquirt {
          * 
          * @returns A Function that determines if a Character and Character are hitting.
          */
-        generateIsCharacterTouchingCharacter(): ThingHittr.IThingHitCheck {
+        generateIsCharacterTouchingParticle(): ThingHittr.IThingHitCheck {
             /**
              * Generic checker for whether a Character is hitting a Solid.
              * 
@@ -549,7 +552,7 @@ module Unisquirt {
          * 
          * @returns A Function for when a Character hits a Character.
          */
-        generateHitCharacterCharacter(): ThingHittr.IThingHitFunction {
+        generateHitCharacterParticle(): ThingHittr.IThingHitFunction {
             /**
              * A callback for when a Character hits a Character. If one is a Player (either
              * the primary one or its shadow), the primary Player is killed.
@@ -872,6 +875,7 @@ module Unisquirt {
             var dy: number = -2.8;
 
             player.alive = false;
+            player.nocollide = true;
             player.xvel = 0;
             player.yvel = 0;
 
