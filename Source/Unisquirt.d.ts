@@ -32,6 +32,13 @@ declare module Unisquirt {
         running?: boolean;
     }
 
+    export interface ICloud extends ICharacter {
+        /**
+         * Whether this shouldn't have its animation effects played.
+         */
+        noSpawn?: boolean;
+    }
+
     /**
      * A Player Thing, which is normally controlled by the user.
      */
@@ -115,5 +122,7 @@ declare module Unisquirt {
         animatePlayerStartRunning(player: IPlayer): void;
 
         animatePlayerStopRunning(player: IPlayer): void;
+
+        animateCloudKiller(thing: IThing): void;
     }
 }

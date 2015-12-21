@@ -552,8 +552,10 @@ module Unisquirt {
             return function hitCharacterCharacter(thing: ICharacter, other: ICharacter): void {
                 if (thing.player) {
                     thing.Unisquirter.killPlayer(thing.Unisquirter.player);
+                    thing.Unisquirter.animateCloudKiller(other);
                 } else if (other.player) {
                     thing.Unisquirter.killPlayer(thing.Unisquirter.player);
+                    thing.Unisquirter.animateCloudKiller(thing);
                 } else {
                     return;
                 }
@@ -585,7 +587,11 @@ module Unisquirt {
          * 
          * @param thing   The Cloud being spawned.
          */
-        spawnCloud(thing: IThing): void {
+        spawnCloud(thing: ICloud): void {
+            if (thing.noSpawn) {
+                return;
+            }
+
             var yvel: number = -thing.Unisquirter.unitsize / 7,
                 isFading: boolean = false;
 
@@ -707,6 +713,41 @@ module Unisquirt {
             player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         }
 
+        animateCloudKiller(thing: ICloud): void {
+            var replacement: IThing = thing.Unisquirter.ObjectMaker.make("Cloud", {
+                "noSpawn": true
+            });
+
+            thing.Unisquirter.addThing(replacement, thing.left, thing.top);
+            thing.Unisquirter.killNormal(thing);
+
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): boolean => {
+                    replacement.scale += .15;
+                    replacement.scale *= 1.007;
+                    thing.Unisquirter.setLeft(
+                        replacement,
+                        thing.left - replacement.width * (replacement.scale - 1));
+                    thing.Unisquirter.setTop(
+                        replacement,
+                        thing.top - replacement.height * (replacement.scale - 1));
+                    return replacement.opacity <= 0;
+                },
+                1,
+                Infinity);
+
+            thing.Unisquirter.TimeHandler.addEvent(
+                (): void => {
+                    thing.Unisquirter.TimeHandler.addEventInterval(
+                        (): boolean => {
+                            replacement.opacity -= .1;
+                            return replacement.opacity <= 0;
+                        },
+                        1,
+                        Infinity);
+                },
+                35);
+        }
 
         /* Actions
         */
@@ -739,7 +780,7 @@ module Unisquirt {
          * @returns The newly created Cloud.
          */
         addCloudBehindPlayer(player: IPlayer): IThing {
-            var cloud: IThing = this.ObjectMaker.make("Cloud", {
+            var cloud: ICloud = this.ObjectMaker.make("Cloud", {
                 "xvel": player.xvel * -.35
             });
 
@@ -820,9 +861,32 @@ module Unisquirt {
          * @param player   The Player being killed.
          */
         killPlayer(player: IPlayer): void {
+            var dy: number = -2.8;
+
             player.alive = false;
             player.xvel = 0;
             player.yvel = 0;
+
+            this.TimeHandler.cancelClassCycle(player, "running");
+            this.addClasses(player, "running", "two");
+            this.flipVert(player);
+
+            this.TimeHandler.addEventInterval(
+                (): boolean => {
+                    this.shiftVert(player, this.unitsize * dy);
+                    dy += .1;
+                    return player.opacity <= 0;
+                },
+                1,
+                Infinity);
+
+            this.TimeHandler.addEventInterval(
+                (): boolean => {
+                    player.opacity -= .015;
+                    return player.opacity <= 0;
+                },
+                1,
+                Infinity);
         }
         
         /**

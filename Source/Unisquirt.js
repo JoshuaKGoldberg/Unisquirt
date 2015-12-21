@@ -431,9 +431,11 @@ var Unisquirt;
             return function hitCharacterCharacter(thing, other) {
                 if (thing.player) {
                     thing.Unisquirter.killPlayer(thing.Unisquirter.player);
+                    thing.Unisquirter.animateCloudKiller(other);
                 }
                 else if (other.player) {
                     thing.Unisquirter.killPlayer(thing.Unisquirter.player);
+                    thing.Unisquirter.animateCloudKiller(thing);
                 }
                 else {
                     return;
@@ -459,6 +461,9 @@ var Unisquirt;
          * @param thing   The Cloud being spawned.
          */
         Unisquirt.prototype.spawnCloud = function (thing) {
+            if (thing.noSpawn) {
+                return;
+            }
             var yvel = -thing.Unisquirter.unitsize / 7, isFading = false;
             thing.nocollide = true;
             thing.opacity = thing.Unisquirter.NumberMaker.randomWithin(.7, .98);
@@ -539,6 +544,26 @@ var Unisquirt;
         Unisquirt.prototype.animatePlayerStopRunning = function (player) {
             player.Unisquirter.removeClasses(player, "running");
             player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
+        };
+        Unisquirt.prototype.animateCloudKiller = function (thing) {
+            var replacement = thing.Unisquirter.ObjectMaker.make("Cloud", {
+                "noSpawn": true
+            });
+            thing.Unisquirter.addThing(replacement, thing.left, thing.top);
+            thing.Unisquirter.killNormal(thing);
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                replacement.scale += .15;
+                replacement.scale *= 1.007;
+                thing.Unisquirter.setLeft(replacement, thing.left - replacement.width * (replacement.scale - 1));
+                thing.Unisquirter.setTop(replacement, thing.top - replacement.height * (replacement.scale - 1));
+                return replacement.opacity <= 0;
+            }, 1, Infinity);
+            thing.Unisquirter.TimeHandler.addEvent(function () {
+                thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                    replacement.opacity -= .1;
+                    return replacement.opacity <= 0;
+                }, 1, Infinity);
+            }, 35);
         };
         /* Actions
         */
@@ -625,9 +650,23 @@ var Unisquirt;
          * @param player   The Player being killed.
          */
         Unisquirt.prototype.killPlayer = function (player) {
+            var _this = this;
+            var dy = -2.8;
             player.alive = false;
             player.xvel = 0;
             player.yvel = 0;
+            this.TimeHandler.cancelClassCycle(player, "running");
+            this.addClasses(player, "running", "two");
+            this.flipVert(player);
+            this.TimeHandler.addEventInterval(function () {
+                _this.shiftVert(player, _this.unitsize * dy);
+                dy += .1;
+                return player.opacity <= 0;
+            }, 1, Infinity);
+            this.TimeHandler.addEventInterval(function () {
+                player.opacity -= .015;
+                return player.opacity <= 0;
+            }, 1, Infinity);
         };
         /**
          * Kills a Player's shadow and unlists it from its Player.
