@@ -155,6 +155,10 @@ module Unisquirt {
             ]);
 
             Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
+            Unisquirter.container.appendChild(Unisquirter.createElement("div", {
+                "id": "instructions",
+                "textContent": "Space to jump; left & right to move"
+            }));
         }
 
 
@@ -169,6 +173,8 @@ module Unisquirt {
             this.ItemsHolder.setItem("score", 0);
             this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
+
+            (<HTMLElement>Unisquirter.container.querySelector("#instructions")).style.display = "block";
         }
 
         /**
@@ -284,6 +290,8 @@ module Unisquirt {
             Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
             Unisquirter.ItemsHolder.increase("numberOfJumps");
+
+            (<HTMLElement>Unisquirter.container.querySelector("#instructions")).style.display = "none";
         }
 
         /**

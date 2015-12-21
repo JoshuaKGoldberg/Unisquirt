@@ -86,6 +86,10 @@ var Unisquirt;
                 Unisquirter.GroupHolder.getGroup("Text")
             ]);
             Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
+            Unisquirter.container.appendChild(Unisquirter.createElement("div", {
+                "id": "instructions",
+                "textContent": "Space to jump; left & right to move"
+            }));
         };
         /* Global manipulations
         */
@@ -97,6 +101,7 @@ var Unisquirt;
             this.ItemsHolder.setItem("score", 0);
             this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
+            Unisquirter.container.querySelector("#instructions").style.display = "block";
         };
         /**
          * Slight addition to the GameStartr thingProcess Function. The Thing's hit
@@ -187,6 +192,7 @@ var Unisquirt;
             Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
             Unisquirter.ItemsHolder.increase("numberOfJumps");
+            Unisquirter.container.querySelector("#instructions").style.display = "none";
         };
         /**
          * Reacts to the left key being raised. The player's left key is marked as up.
