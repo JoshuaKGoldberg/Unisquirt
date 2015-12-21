@@ -153,6 +153,8 @@ module Unisquirt {
                 <IThing[]>Unisquirter.GroupHolder.getGroup("Character"),
                 <IThing[]>Unisquirter.GroupHolder.getGroup("Text")
             ]);
+
+            Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
         }
 
 
@@ -164,6 +166,8 @@ module Unisquirt {
          */
         gameStart(): void {
             this.PixelDrawer.setBackground(this.createNightGradient());
+            this.ItemsHolder.setItem("score", 0);
+            this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
         }
 
@@ -246,11 +250,17 @@ module Unisquirt {
          * @param Unisquirter   The governing Unisquirt.
          */
         keyDownSpace(Unisquirter: Unisquirt): void {
-            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
+            if (Unisquirter.GamesRunner.getPaused()) {
                 return;
             }
 
             var player: IPlayer = Unisquirter.player;
+
+            if (!player.alive) {
+                Unisquirter.gameStart();
+                return;
+            }
+
             if (!player.canJump || player.keys.jump) {
                 return;
             }
@@ -273,6 +283,7 @@ module Unisquirt {
 
             Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
+            Unisquirter.ItemsHolder.increase("numberOfJumps");
         }
 
         /**
@@ -701,13 +712,23 @@ module Unisquirt {
         */
 
         /**
-         * Adds a random number of Clouds just behind a Player.
+         * Adds a random number of Clouds just behind a Player, and increases the score.
          * 
          * @param player   A Player emitting Clouds.
          */
         addCloudsBehindPlayer(player: IPlayer): void {
             for (var i: number = this.NumberMaker.randomIntWithin(7, 14); i > 0; i -= 1) {
                 this.addCloudBehindPlayer(player);
+            }
+
+            var score: number = this.ItemsHolder.getItem("score");
+
+            score += this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
+
+            this.ItemsHolder.setItem("score", score);
+            if (score > this.ItemsHolder.getItem("record")) {
+                this.ItemsHolder.setItem("record", score);
+                this.ItemsHolder.saveItem("record");
             }
         }
 

@@ -85,6 +85,7 @@ var Unisquirt;
                 Unisquirter.GroupHolder.getGroup("Character"),
                 Unisquirter.GroupHolder.getGroup("Text")
             ]);
+            Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
         };
         /* Global manipulations
         */
@@ -93,6 +94,8 @@ var Unisquirt;
          */
         Unisquirt.prototype.gameStart = function () {
             this.PixelDrawer.setBackground(this.createNightGradient());
+            this.ItemsHolder.setItem("score", 0);
+            this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
         };
         /**
@@ -159,10 +162,14 @@ var Unisquirt;
          * @param Unisquirter   The governing Unisquirt.
          */
         Unisquirt.prototype.keyDownSpace = function (Unisquirter) {
-            if (Unisquirter.GamesRunner.getPaused() || !Unisquirter.player.alive) {
+            if (Unisquirter.GamesRunner.getPaused()) {
                 return;
             }
             var player = Unisquirter.player;
+            if (!player.alive) {
+                Unisquirter.gameStart();
+                return;
+            }
             if (!player.canJump || player.keys.jump) {
                 return;
             }
@@ -179,6 +186,7 @@ var Unisquirt;
             }
             Unisquirter.animatePlayerStartRunning(player);
             Unisquirter.addCloudsBehindPlayer(player);
+            Unisquirter.ItemsHolder.increase("numberOfJumps");
         };
         /**
          * Reacts to the left key being raised. The player's left key is marked as up.
@@ -535,13 +543,20 @@ var Unisquirt;
         /* Actions
         */
         /**
-         * Adds a random number of Clouds just behind a Player.
+         * Adds a random number of Clouds just behind a Player, and increases the score.
          *
          * @param player   A Player emitting Clouds.
          */
         Unisquirt.prototype.addCloudsBehindPlayer = function (player) {
             for (var i = this.NumberMaker.randomIntWithin(7, 14); i > 0; i -= 1) {
                 this.addCloudBehindPlayer(player);
+            }
+            var score = this.ItemsHolder.getItem("score");
+            score += this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
+            this.ItemsHolder.setItem("score", score);
+            if (score > this.ItemsHolder.getItem("record")) {
+                this.ItemsHolder.setItem("record", score);
+                this.ItemsHolder.saveItem("record");
             }
         };
         /**

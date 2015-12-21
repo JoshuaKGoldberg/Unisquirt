@@ -22,6 +22,11 @@ var Unisquirt;
                 this.TimeHandler.handleEvents();
             },
             function () {
+                if (this.player.alive) {
+                    this.ItemsHolder.decrease("score");
+                }
+            },
+            function () {
                 this.PixelDrawer.refillGlobalCanvas();
             }
         ]

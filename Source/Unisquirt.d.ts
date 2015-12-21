@@ -55,7 +55,6 @@ declare module Unisquirt {
          *
          */
         cycles?: {
-            trotting: TimeHandlr.ITimeCycle;
             running: TimeHandlr.ITimeCycle;
             [i: string]: TimeHandlr.ITimeCycle;
         }
@@ -112,8 +111,6 @@ declare module Unisquirt {
         killPlayerShadow(thing: IPlayer, replaceWithPlayer?: boolean): void;
 
         getPlayerBehindPosition(player: IPlayer, thing: IThing): [number, number];
-
-        animatePlayerStartTrotting(player: IPlayer): void;
 
         animatePlayerStartRunning(player: IPlayer): void;
 

@@ -5,26 +5,31 @@ module Unisquirt {
 
     Unisquirt.settings.runner = {
         "games": [
-            function () {
+            function (): void {
                 this.DeviceLayer.checkNavigatorGamepads();
                 this.DeviceLayer.activateAllGamepadTriggers();
             },
-            function () {
+            function (): void {
                 this.QuadsKeeper.determineAllQuadrants("Character", this.GroupHolder.getCharacterGroup());
                 this.QuadsKeeper.determineAllQuadrants("Solid", this.GroupHolder.getSolidGroup());
             },
-            function () {
+            function (): void {
                 this.maintainMoving(
                     this.GroupHolder.getCharacterGroup(),
                     this.GroupHolder.getSceneryGroup());
             },
-            function () {
+            function (): void {
                 this.maintainPlayer(this.player);
             },
-            function () {
+            function (): void {
                 this.TimeHandler.handleEvents();
             },
-            function () {
+            function (): void {
+                if (this.player.alive) {
+                    this.ItemsHolder.decrease("score");
+                }
+            },
+            function (): void {
                 this.PixelDrawer.refillGlobalCanvas();
             }
         ]

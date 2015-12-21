@@ -10,4 +10,6 @@ html, body {
 body {
     background: black;
     overflow: hidden;
+    font-family: 'Press Start';
+    font-size: 3.5em;
 }
