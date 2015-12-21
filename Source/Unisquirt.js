@@ -430,16 +430,15 @@ var Unisquirt;
              */
             return function hitCharacterCharacter(thing, other) {
                 if (thing.player) {
-                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                     thing.Unisquirter.animateCloudKiller(other);
                 }
                 else if (other.player) {
-                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                     thing.Unisquirter.animateCloudKiller(thing);
                 }
                 else {
                     return;
                 }
+                thing.Unisquirter.killPlayer(thing.Unisquirter.player);
             };
         };
         /* Spawning
@@ -667,6 +666,9 @@ var Unisquirt;
                 player.opacity -= .015;
                 return player.opacity <= 0;
             }, 1, Infinity);
+            if (player.shadow) {
+                this.killPlayer(player.shadow);
+            }
         };
         /**
          * Kills a Player's shadow and unlists it from its Player.

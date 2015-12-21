@@ -551,14 +551,14 @@ module Unisquirt {
              */
             return function hitCharacterCharacter(thing: ICharacter, other: ICharacter): void {
                 if (thing.player) {
-                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                     thing.Unisquirter.animateCloudKiller(other);
                 } else if (other.player) {
-                    thing.Unisquirter.killPlayer(thing.Unisquirter.player);
                     thing.Unisquirter.animateCloudKiller(thing);
                 } else {
                     return;
                 }
+
+                thing.Unisquirter.killPlayer(thing.Unisquirter.player);
             }
         }
 
@@ -887,6 +887,10 @@ module Unisquirt {
                 },
                 1,
                 Infinity);
+
+            if (player.shadow) {
+                this.killPlayer(player.shadow);
+            }
         }
         
         /**
