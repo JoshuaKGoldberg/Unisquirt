@@ -101,7 +101,7 @@ var Unisquirt;
             this.ItemsHolder.setItem("score", 0);
             this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
-            Unisquirter.container.querySelector("#instructions").style.display = "block";
+            this.container.querySelector("#instructions").style.display = "block";
         };
         /**
          * Slight addition to the GameStartr thingProcess Function. The Thing's hit

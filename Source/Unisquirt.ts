@@ -174,7 +174,7 @@ module Unisquirt {
             this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
 
-            (<HTMLElement>Unisquirter.container.querySelector("#instructions")).style.display = "block";
+            (<HTMLElement>this.container.querySelector("#instructions")).style.display = "block";
         }
 
         /**
