@@ -31,6 +31,7 @@ var Unisquirt;
                 "constantsSource": Unisquirt,
                 "constants": ["unitsize", "scale"]
             }, settings));
+            this.AudioPlayer.playTheme("He-Man Sings");
         }
         /* Resets
         */
@@ -489,7 +490,7 @@ var Unisquirt;
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 if (isFading) {
                     thing.opacity -= .014;
-                    if (thing.opacity < .14) {
+                    if (thing.opacity <= .21) {
                         thing.nocollide = true;
                     }
                     if (thing.opacity <= .07) {
@@ -598,20 +599,20 @@ var Unisquirt;
         Unisquirt.prototype.animateBloodEffects = function (thing) {
             var _this = this;
             var midX = thing.Unisquirter.getMidX(thing), midY = thing.Unisquirter.getMidY(thing), opacity = 1, bloods = [], settings = {}, blood, i;
-            for (i = 14 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
+            for (i = 7 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
                 settings.opacity = thing.Unisquirter.NumberMaker.randomWithin(0.7, 1);
                 settings.scale = thing.Unisquirter.NumberMaker.randomWithin(0.35, 2.1);
                 settings.xvel = thing.Unisquirter.NumberMaker.randomWithin(-0.7, 0.7) * thing.Unisquirter.unitsize;
-                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0, -1.75) * thing.Unisquirter.unitsize;
+                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0.35, -1.75) * thing.Unisquirter.unitsize;
                 blood = thing.Unisquirter.ObjectMaker.make("Blood", settings);
                 bloods.push(blood);
                 thing.Unisquirter.addThing(blood, midX, midY);
             }
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
-                opacity -= .005;
+                opacity -= .021;
                 for (i = 0; i < bloods.length; i += 1) {
                     bloods[i].opacity = opacity;
-                    bloods[i].yvel += _this.unitsize / 40;
+                    bloods[i].yvel += _this.unitsize / 35;
                 }
                 return opacity <= 0;
             }, 1, Infinity);
@@ -760,7 +761,6 @@ var Unisquirt;
          * Things, inputs, and other previous game state in the process.
          */
         Unisquirt.prototype.setMap = function () {
-            this.AudioPlayer.clearAll();
             this.GroupHolder.clearArrays();
             this.InputWriter.restartHistory();
             this.MapScreener.clearScreen();

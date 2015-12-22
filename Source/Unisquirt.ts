@@ -89,6 +89,8 @@ module Unisquirt {
                         "constants": ["unitsize", "scale"]
                     },
                     settings));
+
+            this.AudioPlayer.playTheme("He-Man Sings");
         }
 
 
@@ -633,7 +635,7 @@ module Unisquirt {
                 (): boolean => {
                     if (isFading) {
                         thing.opacity -= .014;
-                        if (thing.opacity < .14) {
+                        if (thing.opacity <= .21) {
                             thing.nocollide = true;
                         }
 
@@ -804,11 +806,11 @@ module Unisquirt {
                 blood: IThing,
                 i: number;
 
-            for (i = 14 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
+            for (i = 7 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
                 settings.opacity = thing.Unisquirter.NumberMaker.randomWithin(0.7, 1);
                 settings.scale = thing.Unisquirter.NumberMaker.randomWithin(0.35, 2.1);
                 settings.xvel = thing.Unisquirter.NumberMaker.randomWithin(-0.7, 0.7) * thing.Unisquirter.unitsize;
-                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0, -1.75) * thing.Unisquirter.unitsize;
+                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0.35, -1.75) * thing.Unisquirter.unitsize;
 
                 blood = thing.Unisquirter.ObjectMaker.make("Blood", settings);
                 bloods.push(blood);
@@ -817,11 +819,11 @@ module Unisquirt {
 
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): boolean => {
-                    opacity -= .005;
+                    opacity -= .021;
 
                     for (i = 0; i < bloods.length; i += 1) {
                         bloods[i].opacity = opacity;
-                        bloods[i].yvel += this.unitsize / 40;
+                        bloods[i].yvel += this.unitsize / 35;
                     }
 
                     return opacity <= 0;
@@ -1030,7 +1032,6 @@ module Unisquirt {
          * Things, inputs, and other previous game state in the process.
          */
         setMap(): void {
-            this.AudioPlayer.clearAll();
             this.GroupHolder.clearArrays();
             this.InputWriter.restartHistory();
             this.MapScreener.clearScreen();

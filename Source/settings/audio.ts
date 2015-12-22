@@ -4,8 +4,10 @@ module Unisquirt {
     "use strict";
 
     Unisquirt.settings.audio = {
-        "directory": "",
-        "fileTypes": [],
-        "library": {}
+        "directory": "Sounds",
+        "fileTypes": ["mp3"],
+        "library": {
+            "Themes": ["He-Man Sings"]
+        }
     };
 }
