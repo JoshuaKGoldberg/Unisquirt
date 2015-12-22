@@ -406,7 +406,7 @@ var Unisquirt;
             };
         };
         /**
-         *Function generator for the generic hitCharacterSolid callback. This is
+         * Function generator for the generic hitCharacterSolid callback. This is
          * used repeatedly by ThingHittr to generate separately optimized Functions
          * for different Thing types.
          *
@@ -422,6 +422,9 @@ var Unisquirt;
             return function hitCharacterSolid(thing, other) {
                 thing.resting = other;
                 thing.Unisquirter.setBottom(thing, other.top);
+                if (thing.player) {
+                    thing.Unisquirter.ItemsHolder.setItem("numberOfJumps", 0);
+                }
             };
         };
         /**
@@ -521,6 +524,21 @@ var Unisquirt;
         /**
          *
          */
+        Unisquirt.prototype.spawnText = function (thing) {
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                thing.Unisquirter.shiftVert(thing, -thing.Unisquirter.unitsize / 2);
+                return thing.opacity <= 0;
+            }, 1, Infinity);
+            thing.Unisquirter.TimeHandler.addEvent(function () {
+                thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                    thing.opacity -= .07;
+                    return thing.opacity <= 0;
+                }, 1, Infinity);
+            }, 14);
+        };
+        /**
+         *
+         */
         Unisquirt.prototype.spawnPlayerShadow = function (thing) {
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
                 if (!thing.alive) {
@@ -556,24 +574,38 @@ var Unisquirt;
             player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         };
         Unisquirt.prototype.animateCloudKiller = function (thing) {
+            var _this = this;
             var replacement = thing.Unisquirter.ObjectMaker.make("Cloud", {
                 "noSpawn": true
             });
             thing.Unisquirter.addThing(replacement, thing.left, thing.top);
             thing.Unisquirter.killNormal(thing);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
-                replacement.scale += .15;
-                replacement.scale *= 1.007;
-                thing.Unisquirter.setLeft(replacement, thing.left - replacement.width * (replacement.scale - 1));
-                thing.Unisquirter.setTop(replacement, thing.top - replacement.height * (replacement.scale - 1));
+                replacement.scale += .21;
+                replacement.scale *= 1.014;
+                thing.Unisquirter.setLeft(replacement, thing.left - replacement.width * (replacement.scale - 1) * _this.unitsize / 2);
+                thing.Unisquirter.setTop(replacement, thing.top - replacement.height * (replacement.scale - 1) * _this.unitsize / 2);
                 return replacement.opacity <= 0;
             }, 1, Infinity);
             thing.Unisquirter.TimeHandler.addEvent(function () {
                 thing.Unisquirter.TimeHandler.addEventInterval(function () {
-                    replacement.opacity -= .1;
+                    replacement.opacity -= .15;
                     return replacement.opacity <= 0;
                 }, 1, Infinity);
-            }, 35);
+            }, 28);
+        };
+        Unisquirt.prototype.animateScorePoints = function (player, gained) {
+            var text = gained.toString(), things = [], padding = this.MathDecider.getConstant("textPadding"), totalWidth = -padding, top = player.top, left, thing, i;
+            for (i = 0; i < text.length; i += 1) {
+                thing = this.ObjectMaker.make("Char" + text[i]);
+                totalWidth += (thing.width + padding) * this.unitsize;
+                things.push(thing);
+            }
+            left = this.getMidX(player) - totalWidth / 2;
+            for (i = 0; i < things.length; i += 1) {
+                this.addThing(things[i], left, top);
+                left += (thing.width + padding) * this.unitsize;
+            }
         };
         /* Actions
         */
@@ -583,32 +615,34 @@ var Unisquirt;
          * @param player   A Player emitting Clouds.
          */
         Unisquirt.prototype.addCloudsBehindPlayer = function (player) {
-            for (var i = this.NumberMaker.randomIntWithin(7, 14); i > 0; i -= 1) {
-                this.addCloudBehindPlayer(player);
+            for (var i = this.MathDecider.compute("numberOfClouds", this.ItemsHolder.getItem("numberOfJumps")); i > 0; i -= 1) {
+                this.addCloudBehindPlayer(player, i / 3);
             }
-            var score = this.ItemsHolder.getItem("score");
-            score += this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
+            var score = this.ItemsHolder.getItem("score"), gained = this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
+            score += gained;
             this.ItemsHolder.setItem("score", score);
             if (score > this.ItemsHolder.getItem("record")) {
                 this.ItemsHolder.setItem("record", score);
                 this.ItemsHolder.saveItem("record");
             }
+            this.animateScorePoints(player, gained);
         };
         /**
          * Adds a Cloud just behind a Player, based on where the Player is facing.
          *
          * @param player   A Player emitting a Cloud.
+         * @param chaos   A multiplier for cloud velocities.
          * @returns The newly created Cloud.
          */
-        Unisquirt.prototype.addCloudBehindPlayer = function (player) {
+        Unisquirt.prototype.addCloudBehindPlayer = function (player, chaos) {
             var cloud = this.ObjectMaker.make("Cloud", {
                 "xvel": player.xvel * -.35
             });
             this.addThingBehindPlayerGeneral(player, cloud);
             this.shiftHoriz(cloud, this.NumberMaker.randomWithin(-this.unitsize * 3, this.unitsize * 3));
             this.shiftVert(cloud, this.NumberMaker.randomWithin(-this.unitsize, this.unitsize));
-            cloud.xvel += this.NumberMaker.randomWithin(-this.unitsize / 7, this.unitsize / 7);
-            cloud.yvel += this.NumberMaker.randomWithin(-this.unitsize / 14, this.unitsize / 14);
+            cloud.xvel += this.NumberMaker.randomWithin(-this.unitsize * chaos / 3, this.unitsize * chaos / 3);
+            cloud.yvel += this.NumberMaker.randomWithin(-this.unitsize * chaos / 14, this.unitsize * chaos / 14);
             cloud.yvel += player.yvel / 10;
             return cloud;
         };

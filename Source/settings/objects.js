@@ -12,7 +12,19 @@ var Unisquirt;
             "Quadrant": {},
             "Thing": {
                 "Particle": {
-                    "Cloud": {}
+                    "Cloud": {},
+                    "Text": {
+                        "Char0": {},
+                        "Char1": {},
+                        "Char2": {},
+                        "Char3": {},
+                        "Char4": {},
+                        "Char5": {},
+                        "Char6": {},
+                        "Char7": {},
+                        "Char8": {},
+                        "Char9": {}
+                    },
                 },
                 "Character": {
                     "Player": {
@@ -44,12 +56,18 @@ var Unisquirt;
                 "onMake": Unisquirt.Unisquirt.prototype.thingProcess
             },
             "Particle": {
-                "groupType": "Particle"
+                "groupType": "Particle",
+                "nocollide": true
             },
             "Cloud": {
                 "width": 7,
                 "height": 7,
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnCloud
+            },
+            "Text": {
+                "width": 8,
+                "height": 8,
+                "onThingAdded": Unisquirt.Unisquirt.prototype.spawnText
             },
             "Character": {
                 "groupType": "Character"

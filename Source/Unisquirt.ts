@@ -529,7 +529,7 @@ module Unisquirt {
         }
 
         /**
-         *Function generator for the generic hitCharacterSolid callback. This is 
+         * Function generator for the generic hitCharacterSolid callback. This is 
          * used repeatedly by ThingHittr to generate separately optimized Functions
          * for different Thing types.
          * 
@@ -545,6 +545,10 @@ module Unisquirt {
             return function hitCharacterSolid(thing: ICharacter, other: IThing): void {
                 thing.resting = other;
                 thing.Unisquirter.setBottom(thing, other.top);
+
+                if (thing.player) {
+                    thing.Unisquirter.ItemsHolder.setItem("numberOfJumps", 0);
+                }
             }
         }
 
@@ -624,6 +628,7 @@ module Unisquirt {
                 },
                 117);
 
+
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): boolean => {
                     if (isFading) {
@@ -671,6 +676,31 @@ module Unisquirt {
                 },
                 1,
                 Infinity);
+        }
+
+        /**
+         *
+         */
+        spawnText(thing: IThing): void {
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): boolean => {
+                    thing.Unisquirter.shiftVert(thing, -thing.Unisquirter.unitsize / 2);
+                    return thing.opacity <= 0;
+                },
+                1,
+                Infinity);
+
+            thing.Unisquirter.TimeHandler.addEvent(
+                (): void => {
+                    thing.Unisquirter.TimeHandler.addEventInterval(
+                        (): boolean => {
+                            thing.opacity -= .07;
+                            return thing.opacity <= 0;
+                        },
+                        1,
+                        Infinity);
+                },
+                14);
         }
 
         /**
@@ -737,14 +767,14 @@ module Unisquirt {
 
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): boolean => {
-                    replacement.scale += .15;
-                    replacement.scale *= 1.007;
+                    replacement.scale += .21;
+                    replacement.scale *= 1.014;
                     thing.Unisquirter.setLeft(
                         replacement,
-                        thing.left - replacement.width * (replacement.scale - 1));
+                        thing.left - replacement.width * (replacement.scale - 1) * this.unitsize / 2);
                     thing.Unisquirter.setTop(
                         replacement,
-                        thing.top - replacement.height * (replacement.scale - 1));
+                        thing.top - replacement.height * (replacement.scale - 1) * this.unitsize / 2);
                     return replacement.opacity <= 0;
                 },
                 1,
@@ -754,13 +784,37 @@ module Unisquirt {
                 (): void => {
                     thing.Unisquirter.TimeHandler.addEventInterval(
                         (): boolean => {
-                            replacement.opacity -= .1;
+                            replacement.opacity -= .15;
                             return replacement.opacity <= 0;
                         },
                         1,
                         Infinity);
                 },
-                35);
+                28);
+        }
+
+        animateScorePoints(player: IPlayer, gained: number): void {
+            var text: string = gained.toString(),
+                things: IThing[] = [],
+                padding: number = this.MathDecider.getConstant("textPadding"),
+                totalWidth: number = -padding,
+                top: number = player.top,
+                left: number,
+                thing: IThing,
+                i: number;
+
+            for (i = 0; i < text.length; i += 1) {
+                thing = this.ObjectMaker.make("Char" + text[i]);
+                totalWidth += (thing.width + padding) * this.unitsize;
+                things.push(thing);
+            }
+
+            left = this.getMidX(player) - totalWidth / 2;
+
+            for (i = 0; i < things.length; i += 1) {
+                this.addThing(things[i], left, top);
+                left += (thing.width + padding) * this.unitsize;
+            }
         }
 
         /* Actions
@@ -772,28 +826,32 @@ module Unisquirt {
          * @param player   A Player emitting Clouds.
          */
         addCloudsBehindPlayer(player: IPlayer): void {
-            for (var i: number = this.NumberMaker.randomIntWithin(7, 14); i > 0; i -= 1) {
-                this.addCloudBehindPlayer(player);
+            for (var i: number = this.MathDecider.compute("numberOfClouds", this.ItemsHolder.getItem("numberOfJumps")); i > 0; i -= 1) {
+                this.addCloudBehindPlayer(player, i / 3);
             }
 
-            var score: number = this.ItemsHolder.getItem("score");
+            var score: number = this.ItemsHolder.getItem("score"),
+                gained: number = this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
 
-            score += this.MathDecider.compute("pointIncrease", this.ItemsHolder.getItem("numberOfJumps"));
-
+            score += gained;
             this.ItemsHolder.setItem("score", score);
+
             if (score > this.ItemsHolder.getItem("record")) {
                 this.ItemsHolder.setItem("record", score);
                 this.ItemsHolder.saveItem("record");
             }
+
+            this.animateScorePoints(player, gained);
         }
 
         /**
          * Adds a Cloud just behind a Player, based on where the Player is facing.
          * 
          * @param player   A Player emitting a Cloud.
+         * @param chaos   A multiplier for cloud velocities.
          * @returns The newly created Cloud.
          */
-        addCloudBehindPlayer(player: IPlayer): IThing {
+        addCloudBehindPlayer(player: IPlayer, chaos: number): IThing {
             var cloud: ICloud = this.ObjectMaker.make("Cloud", {
                 "xvel": player.xvel * -.35
             });
@@ -803,8 +861,8 @@ module Unisquirt {
             this.shiftHoriz(cloud, this.NumberMaker.randomWithin(-this.unitsize * 3, this.unitsize * 3));
             this.shiftVert(cloud, this.NumberMaker.randomWithin(-this.unitsize, this.unitsize));
 
-            cloud.xvel += this.NumberMaker.randomWithin(-this.unitsize / 7, this.unitsize / 7);
-            cloud.yvel += this.NumberMaker.randomWithin(-this.unitsize / 14, this.unitsize / 14);
+            cloud.xvel += this.NumberMaker.randomWithin(-this.unitsize * chaos / 3, this.unitsize * chaos / 3);
+            cloud.yvel += this.NumberMaker.randomWithin(-this.unitsize * chaos / 14, this.unitsize * chaos / 14);
             cloud.yvel += player.yvel / 10;
 
             return cloud;

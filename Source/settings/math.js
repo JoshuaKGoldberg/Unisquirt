@@ -6,11 +6,15 @@ var Unisquirt;
         "constants": {
             "starDistance": 7,
             "cloudPointBase": 25,
-            "cloudPointIncrease": 5
+            "cloudPointIncrease": 5,
+            "textPadding": 0.5
         },
         "equations": {
             "pointIncrease": function (constants, equations, numberofJumps) {
                 return constants.cloudPointBase + numberofJumps * constants.cloudPointIncrease;
+            },
+            "numberOfClouds": function (constants, equations, numberOfJumps) {
+                return 7 + Math.pow(numberOfJumps, .7) | 0;
             }
         }
     };
