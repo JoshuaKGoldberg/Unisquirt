@@ -89,8 +89,7 @@ var Unisquirt;
             ]);
             Unisquirter.container.appendChild(Unisquirter.ItemsHolder.getContainer());
             Unisquirter.container.appendChild(Unisquirter.createElement("div", {
-                "id": "instructions",
-                "textContent": "Space to jump; left & right to move"
+                "id": "instructions"
             }));
         };
         /* Global manipulations
@@ -104,6 +103,7 @@ var Unisquirt;
             this.ItemsHolder.setItem("numberOfJumps", 0);
             this.setMap();
             this.container.querySelector("#instructions").style.display = "block";
+            this.container.querySelector("#instructions").textContent = "Space to jump; left & right to move";
         };
         /**
          * Slight addition to the GameStartr thingProcess Function. The Thing's hit
@@ -738,6 +738,8 @@ var Unisquirt;
             if (player.shadow) {
                 this.killPlayer(player.shadow);
             }
+            this.container.querySelector("#instructions").style.display = "block";
+            this.container.querySelector("#instructions").textContent = "space to go again";
         };
         /**
          * Kills a Player's shadow and unlists it from its Player.
