@@ -581,7 +581,7 @@ var Unisquirt;
             thing.Unisquirter.addThing(replacement, thing.left, thing.top);
             thing.Unisquirter.killNormal(thing);
             thing.Unisquirter.TimeHandler.addEventInterval(function () {
-                replacement.scale += .21;
+                replacement.scale += .07;
                 replacement.scale *= 1.014;
                 thing.Unisquirter.setLeft(replacement, thing.left - replacement.width * (replacement.scale - 1) * _this.unitsize / 2);
                 thing.Unisquirter.setTop(replacement, thing.top - replacement.height * (replacement.scale - 1) * _this.unitsize / 2);
@@ -593,6 +593,28 @@ var Unisquirt;
                     return replacement.opacity <= 0;
                 }, 1, Infinity);
             }, 28);
+            thing.Unisquirter.animateBloodEffects(thing);
+        };
+        Unisquirt.prototype.animateBloodEffects = function (thing) {
+            var _this = this;
+            var midX = thing.Unisquirter.getMidX(thing), midY = thing.Unisquirter.getMidY(thing), opacity = 1, bloods = [], settings = {}, blood, i;
+            for (i = 14 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
+                settings.opacity = thing.Unisquirter.NumberMaker.randomWithin(0.7, 1);
+                settings.scale = thing.Unisquirter.NumberMaker.randomWithin(0.35, 2.1);
+                settings.xvel = thing.Unisquirter.NumberMaker.randomWithin(-0.7, 0.7) * thing.Unisquirter.unitsize;
+                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0, -1.75) * thing.Unisquirter.unitsize;
+                blood = thing.Unisquirter.ObjectMaker.make("Blood", settings);
+                bloods.push(blood);
+                thing.Unisquirter.addThing(blood, midX, midY);
+            }
+            thing.Unisquirter.TimeHandler.addEventInterval(function () {
+                opacity -= .005;
+                for (i = 0; i < bloods.length; i += 1) {
+                    bloods[i].opacity = opacity;
+                    bloods[i].yvel += _this.unitsize / 40;
+                }
+                return opacity <= 0;
+            }, 1, Infinity);
         };
         Unisquirt.prototype.animateScorePoints = function (player, gained) {
             var text = gained.toString(), things = [], padding = this.MathDecider.getConstant("textPadding"), totalWidth = -padding, top = player.top, left, thing, i;

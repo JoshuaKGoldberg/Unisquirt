@@ -124,5 +124,7 @@ declare module Unisquirt {
         animatePlayerStopRunning(player: IPlayer): void;
 
         animateCloudKiller(thing: IThing): void;
+
+        animateBloodEffects(thing: IThing): void;
     }
 }

@@ -767,7 +767,7 @@ module Unisquirt {
 
             thing.Unisquirter.TimeHandler.addEventInterval(
                 (): boolean => {
-                    replacement.scale += .21;
+                    replacement.scale += .07;
                     replacement.scale *= 1.014;
                     thing.Unisquirter.setLeft(
                         replacement,
@@ -791,6 +791,44 @@ module Unisquirt {
                         Infinity);
                 },
                 28);
+
+            thing.Unisquirter.animateBloodEffects(thing);
+        }
+
+        animateBloodEffects(thing: IThing): void {
+            var midX: number = thing.Unisquirter.getMidX(thing),
+                midY: number = thing.Unisquirter.getMidY(thing),
+                opacity: number = 1,
+                bloods: IThing[] = [],
+                settings: any = {},
+                blood: IThing,
+                i: number;
+
+            for (i = 14 * thing.Unisquirter.ItemsHolder.getItem("numberOfJumps"); i >= 0; i -= 1) {
+                settings.opacity = thing.Unisquirter.NumberMaker.randomWithin(0.7, 1);
+                settings.scale = thing.Unisquirter.NumberMaker.randomWithin(0.35, 2.1);
+                settings.xvel = thing.Unisquirter.NumberMaker.randomWithin(-0.7, 0.7) * thing.Unisquirter.unitsize;
+                settings.yvel = thing.Unisquirter.NumberMaker.randomWithin(0, -1.75) * thing.Unisquirter.unitsize;
+
+                blood = thing.Unisquirter.ObjectMaker.make("Blood", settings);
+                bloods.push(blood);
+                thing.Unisquirter.addThing(blood, midX, midY);
+            }
+
+            thing.Unisquirter.TimeHandler.addEventInterval(
+                (): boolean => {
+                    opacity -= .005;
+
+                    for (i = 0; i < bloods.length; i += 1) {
+                        bloods[i].opacity = opacity;
+                        bloods[i].yvel += this.unitsize / 40;
+                    }
+
+                    return opacity <= 0;
+
+                },
+                1,
+                Infinity);
         }
 
         animateScorePoints(player: IPlayer, gained: number): void {

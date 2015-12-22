@@ -13,6 +13,7 @@ var Unisquirt;
             "Thing": {
                 "Particle": {
                     "Cloud": {},
+                    "Blood": {},
                     "Text": {
                         "Char0": {},
                         "Char1": {},
@@ -63,6 +64,10 @@ var Unisquirt;
                 "width": 7,
                 "height": 7,
                 "onThingAdded": Unisquirt.Unisquirt.prototype.spawnCloud
+            },
+            "Blood": {
+                "width": 3,
+                "height": 3
             },
             "Text": {
                 "width": 8,
