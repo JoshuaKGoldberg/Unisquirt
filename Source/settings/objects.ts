@@ -26,7 +26,7 @@ module Unisquirt {
                         "Char7": {},
                         "Char8": {},
                         "Char9": {}
-                    },
+                    }
                 },
                 "Character": {
                     "Player": {

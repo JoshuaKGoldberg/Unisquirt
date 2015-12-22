@@ -70,7 +70,7 @@ module Unisquirt {
         public settings: GameStartr.IGameStartrStoredSettings;
 
         /**
-         * The Thing being controlled by the user.
+         * The Player Thing being controlled by the user.
          */
         public player: IPlayer;
 
@@ -177,7 +177,7 @@ module Unisquirt {
             this.setMap();
 
             (<HTMLElement>this.container.querySelector("#instructions")).style.display = "block";
-            (<HTMLElement>this.container.querySelector("#instructions")).textContent = "Space to jump; left & right to move";
+            (<HTMLElement>this.container.querySelector("#instructions")).textContent = "space to jump; left & right to move";
         }
 
         /**
@@ -305,7 +305,7 @@ module Unisquirt {
         keyUpLeft(Unisquirter: Unisquirt): void {
             Unisquirter.player.keys.left = false;
         }
-        
+
         /**
          * Reacts to the left key being raised. The player's left key is marked as up.
          * 
@@ -314,7 +314,7 @@ module Unisquirt {
         keyUpRight(Unisquirter: Unisquirt): void {
             Unisquirter.player.keys.right = false;
         }
-        
+
         /**
          * Reacts to the right key being raised. The player's right key is marked as up.
          * 
@@ -429,7 +429,11 @@ module Unisquirt {
         }
 
         /**
+         * Determines whether the Player is overlapping the sides of the screen.
+         * If it is, a shadow is ensured to exist, and positioned.
+         * If it isn't, a shadow is ensured to not exist.
          * 
+         * @param player   A Player that may be overlapping the sides of the screen.
          */
         checkPlayerSidesOverflow(player: IPlayer): void {
             if (player.left > this.MapScreener.left && player.right < this.MapScreener.right) {
@@ -479,7 +483,7 @@ module Unisquirt {
              */
             return function canThingCollide(thing: IThing): boolean {
                 return thing.alive && !thing.nocollide;
-            }
+            };
         }
 
         /**
@@ -503,7 +507,7 @@ module Unisquirt {
                     && thing.left <= other.right
                     && thing.right >= other.left
                     && other.top - thing.bottom < thing.Unisquirter.unitsize * 2);
-            }
+            };
         }
 
         /**
@@ -527,7 +531,7 @@ module Unisquirt {
                     && thing.left + thing.Unisquirter.unitsize < other.right
                     && thing.bottom >= other.top
                     && thing.top <= other.bottom);
-            }
+            };
         }
 
         /**
@@ -544,14 +548,14 @@ module Unisquirt {
              * @param thing   A Character hitting other.
              * @param other   A solid being hit by thing.
              */
-            return function hitCharacterSolid(thing: ICharacter, other: IThing): void {
+            return function hitCharacterSolid(thing: IPlayer, other: IThing): void {
                 thing.resting = other;
                 thing.Unisquirter.setBottom(thing, other.top);
 
                 if (thing.player) {
                     thing.Unisquirter.ItemsHolder.setItem("numberOfJumps", 0);
                 }
-            }
+            };
         }
 
         /**
@@ -571,15 +575,15 @@ module Unisquirt {
              */
             return function hitCharacterCharacter(thing: ICharacter, other: ICharacter): void {
                 if (thing.player) {
-                    thing.Unisquirter.animateCloudKiller(other);
+                    thing.Unisquirter.animateCloudBlowingUp(other);
                 } else if (other.player) {
-                    thing.Unisquirter.animateCloudKiller(thing);
+                    thing.Unisquirter.animateCloudBlowingUp(thing);
                 } else {
                     return;
                 }
 
                 thing.Unisquirter.killPlayer(thing.Unisquirter.player);
-            }
+            };
         }
 
 
@@ -662,7 +666,10 @@ module Unisquirt {
         }
 
         /**
-         *
+         * Spawn Function for a Rainbow. It immediately starts fading out, and is
+         * killed when it's completely faded.
+         * 
+         * @param thing   The Rainbow being spawned.
          */
         spawnRainbow(thing: IThing): void {
             thing.Unisquirter.TimeHandler.addEventInterval(
@@ -681,7 +688,10 @@ module Unisquirt {
         }
 
         /**
-         *
+         * Spawn Function for a Text. It immediately stars fading out and floating
+         * upwards, and is killed when it's completely faded.
+         * 
+         * @param thing   The Text being spawned.
          */
         spawnText(thing: IThing): void {
             thing.Unisquirter.TimeHandler.addEventInterval(
@@ -706,7 +716,10 @@ module Unisquirt {
         }
 
         /**
-         *
+         * Spawn Function for a PlayerShadow. It's consistently kept at the same class
+         * as the actual Player.
+         * 
+         * @param thing   The PlayerShadow being spawned.
          */
         spawnPlayerShadow(thing: IPlayer): void {
             thing.Unisquirter.TimeHandler.addEventInterval(
@@ -741,6 +754,12 @@ module Unisquirt {
         /* Animations
         */
 
+        /**
+         * Animation Function for a Player starting to run. The "running" cycle is 
+         * added along with the class.
+         * 
+         * @param player   The Player starting to run.
+         */
         animatePlayerStartRunning(player: IPlayer): void {
             if (player.cycles && player.cycles.running) {
                 return;
@@ -754,12 +773,24 @@ module Unisquirt {
             player.Unisquirter.addClass(player, "running");
         }
 
+        /**
+         * Animation Function for a player stopping running. The "running" cycle is
+         * removed along with the class.
+         * 
+         * @param player   The Player stopping running.
+         */
         animatePlayerStopRunning(player: IPlayer): void {
             player.Unisquirter.removeClasses(player, "running");
             player.Unisquirter.TimeHandler.cancelClassCycle(player, "running");
         }
 
-        animateCloudKiller(thing: ICloud): void {
+        /**
+         * Animation Function for a Cloud blowing up. A replacement is put on the same
+         * place as the original, and timed to expand and fade away.
+         * 
+         * @param thing   The Cloud blowing up.
+         */
+        animateCloudBlowingUp(thing: ICloud): void {
             var replacement: IThing = thing.Unisquirter.ObjectMaker.make("Cloud", {
                 "noSpawn": true
             });
@@ -797,6 +828,13 @@ module Unisquirt {
             thing.Unisquirter.animateBloodEffects(thing);
         }
 
+        /**
+         * Animation Function for bloods spurting from a Cloud hitting a Player.
+         * A random number of Blood Things, in proportion to the number of jumps, are 
+         * spawned and animated with random velocities, scales, and opacities.
+         * 
+         * @param thing   The Cloud that just hit a Player.
+         */
         animateBloodEffects(thing: IThing): void {
             var midX: number = thing.Unisquirter.getMidX(thing),
                 midY: number = thing.Unisquirter.getMidY(thing),
@@ -833,7 +871,14 @@ module Unisquirt {
                 Infinity);
         }
 
-        animateScorePoints(player: IPlayer, gained: number): void {
+        /**
+         * Animation Function for points appearing above a jump. Text Things are added
+         * in a horizontal line and timed to float upwards and fade away.
+         * 
+         * @param player   The Player to have text appear above.
+         * @param gained   How many points were gained.
+         */
+        animateScorePoints(player: IPlayer, gained: number | string): void {
             var text: string = gained.toString(),
                 things: IThing[] = [],
                 padding: number = this.MathDecider.getConstant("textPadding"),
@@ -853,9 +898,10 @@ module Unisquirt {
 
             for (i = 0; i < things.length; i += 1) {
                 this.addThing(things[i], left, top);
-                left += (thing.width + padding) * this.unitsize;
+                left += (things[i].width + padding) * this.unitsize;
             }
         }
+
 
         /* Actions
         */
@@ -909,7 +955,9 @@ module Unisquirt {
         }
 
         /**
-         *
+         * Adds a set of Rainbows just behind a Player, based on where the Player is facing.
+         * 
+         * @param player   A Player emitting Rainbows.
          */
         addRainbowBehindPlayer(player: IPlayer): void {
             var position: [number, number] = this.getPlayerBehindPosition(player, this.ObjectMaker.make("Rainbow")),
@@ -922,15 +970,25 @@ module Unisquirt {
             }
         }
 
-        addThingBehindPlayerGeneral(player: IPlayer, thing: IThing): IThing {
+        /**
+         * Adds a Thing just behind a Player, based on where the Player is facing.
+         * 
+         * @param player   A Player emitting some Thing.
+         * @param thing   The Thing being emitted.
+         */
+        addThingBehindPlayerGeneral(player: IPlayer, thing: IThing): void {
             var position: [number, number] = this.getPlayerBehindPosition(player, thing);
 
-            return <IThing>this.addThing(
-                thing,
-                position[0] - thing.width * this.unitsize / 2,
-                position[1]);
+            this.addThing(thing, position[0] - thing.width * this.unitsize / 2, position[1]);
         }
 
+        /**
+         * Determines the optimal location to place a Thing at a Player's buttocks.
+         * 
+         * @param player   The Player whose buttocks shall be placed upon.
+         * @param thing   The Thing being placed on and/or in the Player's buttocks.
+         * @returns The [left, top] position of the Player's buttocks' peak point.
+         */
         getPlayerBehindPosition(player: IPlayer, thing: IThing): [number, number] {
             var referenceThing: IThing = player,
                 left: number,
@@ -968,7 +1026,8 @@ module Unisquirt {
         */
 
         /**
-         * Kills a Player. For now, this just freezes it in place and disables inputs.
+         * Kills a Player by freezing its cycles, flipping and fading it, removing any
+         * existing shadow, and setting the help text.
          * 
          * @param player   The Player being killed.
          */
@@ -1008,7 +1067,7 @@ module Unisquirt {
             (<HTMLElement>this.container.querySelector("#instructions")).style.display = "block";
             (<HTMLElement>this.container.querySelector("#instructions")).textContent = "space to go again";
         }
-        
+
         /**
          * Kills a Player's shadow and unlists it from its Player.
          * 
@@ -1115,7 +1174,7 @@ module Unisquirt {
          */
         createNightGradient(): CanvasGradient {
             var context: CanvasRenderingContext2D = this.canvas.getContext("2d"),
-                background = context.createLinearGradient(
+                background: CanvasGradient = context.createLinearGradient(
                     this.MapScreener.width / 2,
                     0,
                     this.MapScreener.width,
