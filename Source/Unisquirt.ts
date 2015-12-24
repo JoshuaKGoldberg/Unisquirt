@@ -581,11 +581,16 @@ module Unisquirt {
          */
         spawnStar(thing: IThing): void {
             thing.yvel = thing.Unisquirter.NumberMaker.randomWithin(-.21, -.007);
+
             thing.Unisquirter.TimeHandler.addClassCycle(
                 thing,
                 ["one", "two", "three"],
                 "shimmer",
                 thing.Unisquirter.NumberMaker.randomIntWithin(49, 84));
+
+            thing.Unisquirter.addClass(
+                thing,
+                thing.Unisquirter.NumberMaker.randomArrayMember(["one", "two", "three"]));
         }
 
         /**

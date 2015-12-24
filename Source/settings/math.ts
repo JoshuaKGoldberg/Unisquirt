@@ -6,7 +6,7 @@ module Unisquirt {
     Unisquirt.settings.math = {
         "constants": {
             "starDistance": 7,
-            "cloudPointBase": 25,
+            "cloudPointBase": 35,
             "cloudPointIncrease": 5,
             "textPadding": 0.5
         },
