@@ -183,7 +183,7 @@ declare module Unisquirt {
          * 
          * @returns A Function that determines if a Thing may have its hits checked.
          */
-        generateCanThingCollide(): ThingHittr.IThingCheck;
+        generateCanThingCollide(): ThingHittr.IGlobalCheck;
 
         /**
          * Function generator for the generic isCharacterTouchingSolid checker. This
@@ -193,7 +193,7 @@ declare module Unisquirt {
          * @returns A Function that determines if a Character and Solid are hitting, which
          *          is defined as the Character landing on the Solid.
          */
-        generateIsCharacterTouchingSolid(): ThingHittr.IThingHitCheck;
+        generateIsCharacterTouchingSolid(): ThingHittr.IHitCheck;
 
         /**
          * Function generator for the generic isCharacterTouchingCharacter checker. 
@@ -202,7 +202,7 @@ declare module Unisquirt {
          * 
          * @returns A Function that determines if a Character and Character are hitting.
          */
-        generateIsCharacterTouchingParticle(): ThingHittr.IThingHitCheck;
+        generateIsCharacterTouchingParticle(): ThingHittr.IHitCheck;
 
         /**
          * Function generator for the generic hitCharacterSolid callback. This is 
@@ -211,7 +211,7 @@ declare module Unisquirt {
          * 
          * @returns A Function for when a Character hits a Solid.
          */
-        generateHitCharacterSolid(): ThingHittr.IThingHitFunction;
+        generateHitCharacterSolid(): ThingHittr.IHitCallback;
 
         /**
          * Function generator for the generic hitCharacterCharacter callback. This is 
@@ -220,7 +220,7 @@ declare module Unisquirt {
          * 
          * @returns A Function for when a Character hits a Character.
          */
-        generateHitCharacterParticle(): ThingHittr.IThingHitFunction;
+        generateHitCharacterParticle(): ThingHittr.IHitCallback;
 
         /**
          * Spawn Function for a Star. It's given a random y-velocity updward and 

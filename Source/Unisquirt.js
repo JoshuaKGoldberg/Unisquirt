@@ -61,18 +61,6 @@ var Unisquirt;
             }, Unisquirter.settings.objects));
         };
         /**
-         * Sets this.ThingHitter.
-         *
-         * @param {FullScreenMario} FSM
-         * @param {Object} customs
-         */
-        Unisquirt.prototype.resetThingHitter = function (Unisquirter, settings) {
-            _super.prototype.resetThingHitter.call(this, Unisquirter, settings);
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Character");
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Particle");
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
-        };
-        /**
          * Sets this.container via the parent GameStartr resetContainer, then tells
          * the PixelDrawer which Thing groups are to be drawn.
          *
@@ -111,10 +99,7 @@ var Unisquirt;
          */
         Unisquirt.prototype.thingProcess = function (thing, title, settings, defaults) {
             _super.prototype.thingProcess.call(this, thing, title, settings, defaults);
-            // ThingHittr becomes very non-performant if Functions aren't generated
-            // for each Thing constructor (optimization does not respect prototypal 
-            // inheritance, sadly).
-            thing.GameStarter.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+            thing.GameStarter.ThingHitter.cacheChecksForType(thing.title, thing.groupType);
         };
         /**
          * Adds a Thing via addPreThing based on the specifications in a PreThing.
@@ -283,7 +268,7 @@ var Unisquirt;
             }
             // Resting && running re-check
             if (player.resting) {
-                if (!player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
+                if (!player.Unisquirter.ThingHitter.checkHitForThings(player, player.resting)) {
                     player.resting = undefined;
                 }
                 else if (player.xvel !== 0 && (!player.cycles || !player.cycles.running)) {
@@ -310,9 +295,9 @@ var Unisquirt;
                 this.addRainbowBehindPlayer(player);
             }
             // Collisions
-            this.ThingHitter.checkHitsOf[player.title](player);
+            this.ThingHitter.checkHitsForThing(player);
             if (player.shadow) {
-                this.ThingHitter.checkHitsOf[player.title](player.shadow);
+                this.ThingHitter.checkHitsForThing(player.shadow);
             }
         };
         /**

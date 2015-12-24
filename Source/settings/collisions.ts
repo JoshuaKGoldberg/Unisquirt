@@ -4,8 +4,8 @@ module Unisquirt {
     "use strict";
 
     Unisquirt.settings.collisions = {
-        "groupNames": ["Character", "Particle", "Solid"],
         "keyGroupName": "groupType",
+        "keyTypeName": "title",
         "globalCheckGenerators": {
             "Character": Unisquirt.prototype.generateCanThingCollide,
             "Particle": Unisquirt.prototype.generateCanThingCollide,
@@ -17,7 +17,7 @@ module Unisquirt {
                 "Solid": Unisquirt.prototype.generateIsCharacterTouchingSolid
             }
         },
-        "hitFunctionGenerators": {
+        "hitCallbackGenerators": {
             "Character": {
                 "Particle": Unisquirt.prototype.generateHitCharacterParticle,
                 "Solid": Unisquirt.prototype.generateHitCharacterSolid

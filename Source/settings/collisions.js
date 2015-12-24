@@ -3,8 +3,8 @@ var Unisquirt;
 (function (Unisquirt) {
     "use strict";
     Unisquirt.Unisquirt.settings.collisions = {
-        "groupNames": ["Character", "Particle", "Solid"],
         "keyGroupName": "groupType",
+        "keyTypeName": "title",
         "globalCheckGenerators": {
             "Character": Unisquirt.Unisquirt.prototype.generateCanThingCollide,
             "Particle": Unisquirt.Unisquirt.prototype.generateCanThingCollide,
@@ -16,7 +16,7 @@ var Unisquirt;
                 "Solid": Unisquirt.Unisquirt.prototype.generateIsCharacterTouchingSolid
             }
         },
-        "hitFunctionGenerators": {
+        "hitCallbackGenerators": {
             "Character": {
                 "Particle": Unisquirt.Unisquirt.prototype.generateHitCharacterParticle,
                 "Solid": Unisquirt.Unisquirt.prototype.generateHitCharacterSolid

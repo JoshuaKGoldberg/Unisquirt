@@ -127,20 +127,6 @@ module Unisquirt {
         }
 
         /**
-         * Sets this.ThingHitter.
-         * 
-         * @param {FullScreenMario} FSM
-         * @param {Object} customs
-         */
-        resetThingHitter(Unisquirter: Unisquirt, settings: GameStartr.IGameStartrSettings): void {
-            super.resetThingHitter(Unisquirter, settings);
-
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Character");
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Particle");
-            Unisquirter.ThingHitter.cacheHitCheckGroup("Solid");
-        }
-
-        /**
          * Sets this.container via the parent GameStartr resetContainer, then tells
          * the PixelDrawer which Thing groups are to be drawn.
          * 
@@ -187,10 +173,7 @@ module Unisquirt {
         thingProcess(thing: IThing, title: string, settings: any, defaults: any): void {
             super.thingProcess(thing, title, settings, defaults);
 
-            // ThingHittr becomes very non-performant if Functions aren't generated
-            // for each Thing constructor (optimization does not respect prototypal 
-            // inheritance, sadly).
-            thing.GameStarter.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+            thing.GameStarter.ThingHitter.cacheChecksForType(thing.title, thing.groupType);
         }
 
         /**
@@ -392,7 +375,7 @@ module Unisquirt {
 
             // Resting && running re-check
             if (player.resting) {
-                if (!player.Unisquirter.ThingHitter.checkHit(player, player.resting, "Player", "Solid")) {
+                if (!player.Unisquirter.ThingHitter.checkHitForThings(player, player.resting)) {
                     player.resting = undefined;
                 } else if (player.xvel !== 0 && (!player.cycles || !player.cycles.running)) {
                     player.Unisquirter.animatePlayerStartRunning(player);
@@ -422,9 +405,9 @@ module Unisquirt {
             }
 
             // Collisions
-            this.ThingHitter.checkHitsOf[player.title](player);
+            this.ThingHitter.checkHitsForThing(player);
             if (player.shadow) {
-                this.ThingHitter.checkHitsOf[player.title](player.shadow);
+                this.ThingHitter.checkHitsForThing(player.shadow);
             }
         }
 
@@ -474,7 +457,7 @@ module Unisquirt {
          * 
          * @returns A Function that determines if a Thing may have its hits checked.
          */
-        generateCanThingCollide(): ThingHittr.IThingCheck {
+        generateCanThingCollide(): ThingHittr.IGlobalCheck {
             /**
              * Generic checker for whether a Thing may have its hits checked.
              * 
@@ -494,7 +477,7 @@ module Unisquirt {
          * @returns A Function that determines if a Character and Solid are hitting, which
          *          is defined as the Character landing on the Solid.
          */
-        generateIsCharacterTouchingSolid(): ThingHittr.IThingHitCheck {
+        generateIsCharacterTouchingSolid(): ThingHittr.IHitCheck {
             /**
              * Generic checker for whether a Character is landing on a Solid.
              * 
@@ -517,7 +500,7 @@ module Unisquirt {
          * 
          * @returns A Function that determines if a Character and Character are hitting.
          */
-        generateIsCharacterTouchingParticle(): ThingHittr.IThingHitCheck {
+        generateIsCharacterTouchingParticle(): ThingHittr.IHitCheck {
             /**
              * Generic checker for whether a Character is hitting a Solid.
              * 
@@ -541,7 +524,7 @@ module Unisquirt {
          * 
          * @returns A Function for when a Character hits a Solid.
          */
-        generateHitCharacterSolid(): ThingHittr.IThingHitFunction {
+        generateHitCharacterSolid(): ThingHittr.IHitCallback {
             /**
              * A callback for when a Character hits a Solid.
              * 
@@ -565,7 +548,7 @@ module Unisquirt {
          * 
          * @returns A Function for when a Character hits a Character.
          */
-        generateHitCharacterParticle(): ThingHittr.IThingHitFunction {
+        generateHitCharacterParticle(): ThingHittr.IHitCallback {
             /**
              * A callback for when a Character hits a Character. If one is a Player (either
              * the primary one or its shadow), the primary Player is killed.
