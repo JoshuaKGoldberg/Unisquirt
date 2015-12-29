@@ -39,7 +39,7 @@ var ItemsHoldr;
                 // If there exists an old version of this property, get it 
                 if (ItemsHolder.getLocalStorage().hasOwnProperty(ItemsHolder.getPrefix() + key)) {
                     this.value = this.retrieveLocalStorage();
-                    this.updateElement();
+                    this.update();
                 }
                 else {
                     // Otherwise save the new version to memory
