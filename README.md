@@ -1,6 +1,6 @@
 ## Unisquirt [![Build Status](https://travis-ci.org/JoshuaKGoldberg/Unisquirt.svg?branch=master)](https://travis-ci.org/JoshuaKGoldberg/Unisquirt)
 
-#### You're a rainbow-pooping unicorn. How long can you last?
+#### You're a rainbow-pooping unicorn. How long can you fly through the sky?
 
 
 ## How to Play
@@ -8,6 +8,8 @@
 #### Newcomers (non-coders)
 
 [Download the latest release](https://github.com/JoshuaKGoldberg/Unisquirt/releases) of this project, extract that onto your computer, and open **index.html** in a browser (preferably Google Chrome). That's it!
+
+You gain points the more jumps you can do without touching the ground or dying.
 
 #### In your own site
 
