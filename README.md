@@ -7,7 +7,7 @@
 
 #### Newcomers (non-coders)
 
-[Download the latest release](https://github.com/JoshuaKGoldberg/Unisquirt/releases) of this project, extract that onto your computer, and open **index.html** in a browser (preferably Google Chrome). That's it!
+[Download the latest release](https://github.com/JoshuaKGoldberg/Unisquirt/releases) of this project, extract that onto your computer, and open **index.html** in a modern browser. That's it!
 
 You gain points the more jumps you can do without touching the ground or dying.
 
